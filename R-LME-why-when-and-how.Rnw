@@ -1,0 +1,813 @@
+
+
+
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \usetheme{CambridgeUS}
+  % or ...
+
+  \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+}
+
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+\usepackage{amsmath}
+
+\graphicspath{{/Users/robdavies/Dropbox/resourcesimages/}}
+% enter in the {{}} whatever the file path will be to get to the images
+
+
+\title
+{Using Linear mixed-effects models -- why, when and how}
+
+\author
+{Rob Davies}
+
+\institute
+{r.davies1@lancaster.ac.uk}
+
+\date
+{May 2016}
+
+\subject{Statistics}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+
+\section{Introduction}
+
+
+
+\subsection{Aims for the class}
+
+
+\begin{frame}{Aims for the class}
+  \begin{enumerate}
+  \item
+  Understand the motivation for \emph{linear mixed-effects models} -- the requirements of handling multilevel structured data
+  \item
+  Introduce a multilevel structured dataset
+  \item
+  Recognize alternative methods for analyzing multilevel structured data
+  \item
+  Practise running linear mixed-effects models in R
+  \item
+  Evaluating models using information criteria
+  \end{enumerate}  
+\end{frame}
+
+
+
+\section{Introduction to Linear mixed-effects models}
+
+
+
+\subsection{Main ideas}
+
+
+% -- see: Snijders, T.A.B., & Bosker, R.J. (1999). Multilevel analysis: An introduction to basic and advanced multilevel modeling. Sage.
+
+\begin{frame}{Phenomena and data sets in the social sciences often have a multilevel structure}{\emph{Repeated measures} or \emph{clustered data}}
+\begin{itemize}
+\item<1->
+Test the same people multiple times
+\begin{itemize}
+\item<2->
+Pre and post treatment
+\item<3->
+Multiple stimuli -- everyone sees the same stimuli
+\item<4->
+Repeated testing -- follow learning, development within individuals -- in longitudinal designs
+\end{itemize}
+\item<5->
+Do multi-stage sampling
+\begin{itemize}
+\item<6->
+Find (sample) classes or schools -- test (sample) children within classes or schools
+\item<7->
+Find (sample) clinics -- test (sample) patients within clinics
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{The key insight: observations are clustered -- correlated -- \emph{not independent}}{Dependence of observations could be treated as a nuisance because an assumption of linear models is that observations are independent so failing to take dependence into account may result in incorrect inferences -- the non-independence of observations means you have less information than their total number of suggests you have}
+\end{frame}
+
+\begin{frame}{Where we are going: \emph{linear mixed-effects modelling}}{Capture sources of variance due to \emph{fixed effects} e.g. frequency and \emph{random effects} e.g. differences between sampling units like people or words in intercepts or slopes}
+     \begin{figure}     
+      \includegraphics[scale=0.2]{indiv-diffs-reading-perlearner-logrtxlogcelex-250210}
+      \caption{Effect of word frequency on word naming latencies of adult students}
+     \end{figure}     
+\end{frame}
+
+
+\subsection{ML study -- A concrete usage example}
+
+
+\begin{frame}{In psychological research, uniformity - the average participant - is a convenient simplification}{We often average over individual differences to investigate experimental effects -- or we study differences between participant groups averaging over responses to different stimuli}
+    \begin{figure}
+		\includegraphics[scale=0.25]{crowd-korean-CC-Eric-Lafforgue}
+		\end{figure}
+\end{frame}
+
+\begin{frame}{Both approaches cause problems but neither are necessary with linear mixed-effects models}{If we consider variability among individuals or sub-groups, focusing on the average appears risky}
+		\begin{figure}
+		\includegraphics[scale=0.25]{crowd-CC-CatWalker}
+		\end{figure}
+\end{frame}
+
+\begin{frame}{ML study -- A concrete usage example}{We can investigate systematic variation in effects by looking for \emph{interactions}}
+	\begin{itemize}
+	\item<1->
+	Person-level effects: how reader attributes affect performance
+	\item<2->
+	Word-level effects: how word attributes affect performance
+	\item<3->
+	\emph{Interactions}: how word-level effects are modulated by person-level effects
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{ML study -- A concrete usage example}{The data-set -- experimental reading task -- lexical decision}
+		\begin{itemize}
+		\item
+		All participants saw all 160 words and 160 matched non-words
+		\item
+		Effects of \emph{TOWRE} measures of reading skill, age, ART measure of print exposure
+		\item		
+		Effects of word attributes like length in letters, frequency of occurrence
+		\item
+		Interactions between effects of \emph{who} you and effects of \emph{what} you read e.g. TOWRE non-word score * word frequency
+		\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Get the data for practice -- download and read in the ML datset of responses to words and nonwords}{Having read in \emph{subjects.behaviour.items-310114.csv}, use \emph{subset()} to remove errors}
+\small{\begin{verbatim}
+ML.all <- read.csv("subjects.behaviour.items-310114.csv", 
+header=T, na.strings = "-999")
+
+ML.all.correct <- subset(ML.all, RT > 200)
+\end{verbatim}}
+\end{frame}
+
+
+
+\section{From linear models to linear mixed-effects models}
+
+
+
+\subsection{Dealing with repeated-measures data}
+
+
+\begin{frame}[fragile]{The logic of Analysis of Variance in linear model terms}
+	\begin{equation}
+		X_{ij} = \mu + (\mu_j - \mu) + \varepsilon_{ij} = \mu + \tau_j + \varepsilon_{ij}
+	\end{equation}
+\begin{itemize}	
+	\item<1->
+	$X_{ij}$ -- the score of person $i$ in condition $j$
+	\item<1->
+	$\mu$ -- the mean of all subjects who could be tested in the experiment
+	\item<1->
+	$\mu_j$ -- the mean score in condition $j$
+	\item<2->
+	$\tau_j$ -- the extent to which the mean for condition $j$ is different from the overall mean
+	\item<1->
+	$\varepsilon_{ij}$ -- the amount to which person $i$ in condition $j$ differs from the mean for that group
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{If you take repeated measures then observations will be \emph{dependent} -- correlated -- within each person}{For a slow responder, all their responses will be slow together}
+\begin{itemize}	
+	\item<1->
+	Linear models assume independence of observations
+	\item<2->
+	One way to take the dependence out is by centring all observations for each person on the means (for each person)
+%	\item<3->
+%	Faust et al. (1999) recommend standardising scores before modelling -- for each score, remove the subject mean and divide by the subject SD of scores
+%	\item<4->
+%	If we remove subject means then we take out -- effectively we \emph{partial out the differences between subjects}
+%	\item<5->
+%	We can then isolate the treatment effect we care about	
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{We can achieve the same thing as centering by accounting for between and within subject differences in our model}
+	\begin{equation}
+		X_{ij} = \mu + \alert{\pi_i} + \tau_j + \varepsilon_{ij}
+	\end{equation}
+\begin{itemize}	
+	\item<1->
+	$X_{ij}$ -- the score of person $i$ in condition $j$
+	% -- grand mean
+	\item<1->
+	$\mu$ -- the mean of all subjects who could be tested in the experiment
+	\item<2->
+	\alert{$\pi_i$ -- add effect of being subject $i$ -- compared to average over all subjects}
+	% subjects (grand mean)}
+	\item<1->
+	$\tau_j$ -- add effect of being in condition $j$ -- compared to average over all conditions 
+	%(grand mean)
+	\item<1->
+	$\varepsilon_{ij}$ -- the amount to which person $i$ in condition $j$ differs from the mean for that group
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A more realistic repeated measures model}{Suppose that effects vary between subjects}
+	\begin{equation}
+		X_{ij} = \mu + \tau_j + \alert{\pi_i + \pi_i\tau_j} + \varepsilon_{ij}
+	\end{equation}
+\begin{itemize}	
+	\item
+	$X_{ij}$ -- the score of person $i$ in condition $j$ -- grand mean
+	\item
+	$\mu$ -- the mean of all subjects who could be tested in the experiment
+  \item
+	$\tau_j$ -- add effect of being in condition $j$ -- compare average over all conditions (grand mean)
+  \item
+	\alert{$\pi_i$ -- add effect of being subject $i$ -- compare average over all subjects (grand mean)}
+	\item
+	\alert{$\pi_i\tau_j $ -- a subject by treatment interaction -- different subjects (or words) react to conditions in different ways}
+	\item
+	$\varepsilon_{ij}$ -- the amount to which person $i$ in condition $j$ differs from the mean for that group
+\end{itemize}
+\end{frame}
+
+
+\subsection{The language as fixed effect fallacy}
+
+
+\begin{frame}{\emph{The language as fixed effect fallacy}}{We need to deal with effects of random variation due to random differences between stimuli as well as differences between people}
+\end{frame}
+
+\begin{frame}[fragile]{\emph{The language as fixed effect fallacy} -- a very famous paper by Clark (1973)}
+\begin{itemize}  
+	\item<1->
+	Historically, psychologists tested effects against error variance due to differences between people
+	\item<2->
+	They ignored differences due to stimuli 
+	\item<3->
+	This meant they might find significant effects not because there were true differences between conditions
+	\item<4->
+	But because there were also random differences between stimuli in the responses they elicited
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A linear model taking into account \emph{the random effects of items}}
+	\begin{equation}
+		X_{ij} = \mu + \pi_i + \tau_j + \pi_i\tau_j + \alert{\beta_k +   \pi_i\beta_k}  + \varepsilon_{ijk}
+	\end{equation}
+\begin{itemize}	
+	\item<1->
+	 \alert{$\beta_k$ -- effect of word $k$} -- unexplained differences in average response elicited by different stimuli
+	\item<2->
+	 \alert{$\pi_i\beta_k$ -- the stimulus word by subject interaction} -- different people respond to different stimuli differently
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Taking into account error variance due to subjects and items}{Clark's (1973) $minF'$ solution}
+\begin{equation}
+			minF' = \frac{MS_{\tau}}{MS_{\pi\tau} + MS_{\beta_k}} = \frac{F_1F_2}{F_1 + F_2}
+\end{equation}
+\begin{itemize}
+	\item<1->
+	You start by \emph{aggregating} your data
+	\item<2->
+	By-subjects data -- for each subject, take the average of their responses to all the items
+	\item<3->
+	By-items data -- for each item, take the average of all subjects' responses
+	\item<4->
+	You do separate ANOVAs, one for by-subjects (F1) data and one for by-items (F2) data
+	\item<5->
+	 You put F1 and F2 together in the calculation of minF'
+\end{itemize}
+\end{frame}
+
+
+\subsection{Repeated measures regression analysis}
+
+
+\begin{frame}{The problem with minF' is that it is only good for ANOVA and ANOVA is only good for testing the effects of categorical variables -- \emph{factors}}{Many dealt with the Clark problem, and allowed themselves to include predictors that were continuous variables, by performing regression analyses of by-items data}
+     \begin{figure}     
+      \includegraphics[scale=0.265]{indiv-diffs-reading-perlearner-logrtxlogcelex-250210}
+      \caption{Effect of word frequency on word naming latencies of adult students}
+     \end{figure}     
+\end{frame}
+
+\begin{frame}{Repeated measures regression analysis}{The problem with regression on by-items means data}
+\begin{itemize}
+	\item<1->
+	Lorch \& Myers (1990) argued there is a problem with multiple regression on by-items mean observations
+	\item<2->
+ 	The approach reverses the language-as-fixed-effect problem
+	\item<3->
+	Effects are assessed by comparison with an item-based error term
+	\item<4->
+	Effects can be significant because of random variation between subjects in how they responded to items
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Repeated measures regression analysis}{The problem with regression on by-items means data}
+\begin{itemize}
+	\item<1->
+	Lorch \& Myers (1990) suggested two solutions to the problem with multiple regression on by-items mean observations
+	\begin{enumerate}
+	\item<2->
+	Code for subject with $n-1$ dummy variables and complete regression using subject, and subject by effect, predictors
+	\item<3->
+	Perform a regression (linear model) on each subject and complete a t-test or ANOVA on the resulting per-subject coefficients
+	\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Analyses of results with simulated data and alternate procedures suggested that the Lorch \& Myers by-subjects regression approach does not really work}
+     \begin{figure}     
+      \includegraphics[scale=0.45]{LME-baayen-2008-data-simulation-analyses}
+      \caption{Baayen et al. (2008): simulated data with or without effects present: item = by-items means regression; lmerS = LM90 per-subject regression approach}
+     \end{figure}     
+\end{frame}
+
+\begin{frame}{If you do repeated measures studies of any kind, you need to take the `language-as-fixed-effect fallacy' into account -- participant and stimulus random effects}
+\end{frame}
+
+
+\subsection{Shift to mixed-effects models}
+
+
+\begin{frame}{Dealing with clustered data -- start by ignoring the multilevel structure}{You could try to run an ordinary linear model including subject-level and item-level variables}
+	\begin{equation}
+	RT = \beta_0 +  \beta_{word reading ability} + \beta_{itemtype} + \beta_{word*itemtype} + \epsilon
+	\end{equation}
+\begin{itemization}
+\item<1->
+But it is usually incorrect to assume the multilevel structure can be represented by the explanatory variables alone
+  \begin{itemize}
+	\item<2->
+	What about effect of \emph{random} variation between \emph{participants}?
+	\item<2->
+	What about effect of \emph{random} variation between \emph{stimuli}?
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A more realistic repeated measures model of the item type and reading ability effects}{Taking into account random effects of subjects and items}
+	\footnotesize{\begin{equation}
+	RT = \beta_0 +  \beta_{word reading ability} + \beta_{itemtype} + \beta_{ability*itemtype} + 
+	\emph{\beta_{subject}} + \beta_{item} + \emph{\beta_{subject*itemtype}} + \epsilon
+	\end{equation}}
+\begin{itemize}
+	\item<1->
+	What about effect of random variation between participants?
+		\begin{itemize}
+		\item<2->
+		Allow \emph{intercept varies} -- random effect of subject -- some have slower average some have faster average than average overall
+		\item<3->
+		Allow \emph{effect of item type varies} -- random effect of subject -- subjects can have effects of different direction or size
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A more realistic repeated measures model of the item type and reading ability effects}{Taking into account random effects of subjects and items}
+	\footnotesize{\begin{equation}
+	RT = \beta_0 +  \beta_{word reading ability} + \beta_{itemtype} + \beta_{ability*itemtype} + 
+	\beta_{subject} + \emph{\beta_{item}} + \beta_{subject*itemtype} + \epsilon
+	\end{equation}}
+\begin{itemize}
+	\item<1->
+	What about effect of random variation between stimuli?
+		\begin{itemize}
+		\item<2->
+		Allow \emph{intercept varies} -- random effect of items -- some items harder and elicit slower average response and some easier and elicit faster responses on average than average overall
+		\item<3->
+		Allow \emph{effect of reading ability varies} -- within-items effect of subject type can be different for different items
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{We do not model random effects directly -- we just estimate the \emph{spread} of variation in intercepts}{\emph{random intercepts} -- predicted differences (adjustments) between the overall average and the group e.g. person average}
+     \begin{figure}     
+      \includegraphics[scale=0.2]{learners-persubj-oneplot-random-intercepts-freq-RT-010314}
+      \small{\caption{Learner data -- random intercepts, fixed slope in frequency effect}}
+     \end{figure} 
+\end{frame}
+
+\begin{frame}{In fact, we can allow for random differences in the \emph{slopes} of the effects of theoretical interest}{\emph{random slopes} -- predicted differences (adjustments) between the overall effect and the group e.g. per-person effect}
+\begin{figure}     
+      \includegraphics[scale=0.2]{learners-persubj-oneplot-random-intercepts-slopes-freq-RT-010314}
+      \caption{Individual differences in effect of word frequency on RTs}
+     \end{figure}  
+\end{frame}    
+
+\begin{frame}{The advantages of mixed-effects models}
+\begin{itemize}
+	\item<1->
+	Approach is not restrictive about predictors or data structure
+	% -- compared to minF ANOVA
+	\begin{itemize}
+	\item<2->
+	ANOVA is OK for experimental designs, categorical factors, data sets without missing values
+	\end{itemize}
+	\item<3->
+	Can test effects at different levels of hierarchy
+	\item<3->
+	We can allow random effects of both subjects and items -- solving the `language-as-fixed-effect' problem
+  \item<4->
+  Estimation robust to imbalances in data
+\end{itemize}
+\end{frame}
+
+
+
+\section{Running LME code in R}
+
+
+\begin{frame}[fragile]{We focus on building a series of models up to the most complex model supported by the data}
+\begin{itemize}
+ \item<1->
+	A minimal model of the data might assume that the data we observe can be predicted only by the average value of observations
+	\begin{itemize}
+	\item<2->
+	The overall average -- intercept -- and random effects of grouping variables like subjects or stimulus items
+	\end{itemize}
+	\item<3->
+	The question is then whether our capacity to predict observations is improved by adding other terms
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examine the fixed effects then the random effects}
+\begin{itemize}
+	\item<1->
+	Start by examining models varying in the \emph{fixed effects} but constant in the \emph{random effects}
+	\item<2->
+	Fitted using maximum likelihood ($REML=FALSE$) method
+	\begin{itemize}
+	\item<3->
+	Think about simpler models being \emph{nested} inside -- i.e. as simplifications of -- more complex models
+	\end{itemize}
+	\item<4->
+	Add effects of interest -- because they were manipulated, are of theoretical or practical interest -- fixed effects in series	
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{R code for running a linear mixed-effects model is similar to the code for running a linear model}
+\begin{verbatim}
+full.lmer0 <- lmer(logrt ~
+                     
+                     (1|subjectID) + (1|item_name),
+                   
+data = ML.all.correct, REML = F)
+\end{verbatim}
+\begin{itemize}
+	\item<1->
+	\verb:lmer(): -- run a \emph{Linear Mixed-effects model} rather than \emph{lm() linear model}
+	\item<2->
+ 	\verb:(1|subjectID) + (1|item_name): specify random effects
+	\begin{itemize}
+	\item<3->
+	\verb:(1|...): -- random effect on intercepts
+	\item<4->
+	\verb:subjectID:  or \verb:item_name: -- effects of subjects or items -- specified by subject identity code (ID) or item name in coding variables
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{REML and ML estimation and model comparison}
+\begin{verbatim}
+full.lmer0 <- lmer(logrt ~
+                    
+                    (1|subjectID) + (1|item_name),
+                  
+data = subjects.behaviour.items.nomissing, REML = F)
+\end{verbatim}
+\begin{itemize}
+	\item<1->
+	\verb:REML = F: -- maximum likelihood estimation
+	\item<2->
+	Maximum likelihood estimation seeks to find those parameter values that, given the data and our choice of model, make the model's predicted values most similar to the observed values
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Estimation methods}{An intuitive account of estimation in mixed-effects models}
+% \begin{itemize}
+% 	\item<1->
+% 	If we knew the random effects, we could find the fixed effects estimates by minimising differences -- like linear modelling
+% 	\item<2->
+% 	If we knew the fixed effects -- the regression coefficients -- we could work out the residuals and the random effects
+% 	\item<3->
+% 	At the start, we know neither, but we can move between partial estimation of fixed and random effect in an \emph{iterative approach}
+% 	\begin{itemize}
+% 	\item<4->
+% 	Using provisional values for the fixed effects to estimate the random effects
+% 	\item<5->
+% 	Using provisional values for the random effects to estimate the fixed effects again
+% 	\item<6->
+% 	To \emph{converge} on the maximum likelihood estimates of effects -- when the estimates stop changing
+% 	\end{itemize}	
+% \end{itemize}
+% \end{frame}
+% 
+% \begin{frame}[fragile]{Restricted maximum likelihood ($REML=TRUE$) and maximum likelihood ($REML=FALSE$) methods}
+% \begin{itemize}
+% 	\item<1->
+% 	Restricted maximum likelihood ($REML=TRUE$)
+% 	\begin{itemize}
+% 	\item<2->
+% 	REML estimates the variance components while taking into account the loss of degrees of freedom resulting from the estimation of the fixed effects
+% 	\item<3->
+% 	\emph{REML estimates vary if the fixed effects vary}
+% 	\item<4->
+% 	Therefore not recommended to compare the \emph{likelihood} of models varying in fixed effects fitted using REML (Pinheiro \& Bates, 2000)
+% 	% pinheiro & bates 2000 / p.76
+% 	\end{itemize}	
+% 	\item<5->
+% 	REML method recommended for comparing the likelihood of models with \emph{the same fixed effects} but \emph{different random effects}
+% 	% snijders & boskers p.60
+% 	\begin{itemize}
+% 	\item<6->	
+% 	REML more accurate for random effects estimation
+% 	% snijders & boskers p.89
+% 	\end{itemize}
+% \end{itemize}
+% \end{frame}
+% 
+% \begin{frame}[fragile]{Model comparisons among mixed-effects models -- maximum likelihood methods}
+% \begin{verbatim}
+% full.lmer0 <- lmer(logrt ~
+%                      
+% (1|subjectID) + (1|item_name),
+%                    
+% data = subjects.behaviour.items.nomissing, REML = F)
+% \end{verbatim}
+% \begin{itemize}
+% 	\item<1->
+% 	Maximum likelihood ($REML=FALSE$)
+% 	\begin{itemize}
+% 	\item<2->
+% 	ML estimation methods can be used to fit models with varying fixed effects but the same random effects
+% 	\item<3->
+% 	ML estimation: a good place to start when building-up model complexity -- adding parameters to an empty model
+% 	% P & B 2000 advise that approach is anti conservative but barr et al 2013 argue not so
+% 	\end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{LMEs -- build-up the \emph{fixed} effects while holding the \emph{random} effects constant}{To empty model, for the ML study analysis, add subject then item attribute predictors}
+\footnotesize{\begin{verbatim}
+full.lmer1 <- lmer(logrt ~
+                  
+zAge + zTOWRE_wordacc + zTOWRE_nonwordacc +
+                     
+(1|subjectID) + (1|item_name),
+                   
+data = ML.all.correct, REML = F)
+
+summary(full.lmer1)
+\end{verbatim}}
+\begin{itemize}
+	\item<1->
+	\verb:zAge + zTOWRE_wordacc: add fixed effects -- just as in linear models
+	\item<2->
+ 	\emph{Fixed effects} reproducible effects -- manipulated, selected -- of theoretical or practical interest
+	\item<3->
+	\verb:summary(full.lmer1): -- print a model summary
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Compare the empty model lmer0 to the model with just subject effects lmer1 to the model also with item effects lmer2 \dots}
+% \footnotesize{\begin{verbatim}
+% full.lmer2 <- lmer(logrt ~
+%                      
+% zAge + zTOWRE_wordacc + zTOWRE_nonwordacc +
+%                                 
+% item_type + zLength + zOrtho_N +
+%                      
+% (1|subjectID) + (1|item_name),
+%                                         
+% data = ML.all.correct, REML = F)
+%                    
+% # getting model effects summary
+%                    
+% summary(full.lmer2)
+% \end{verbatim}}
+% \begin{itemize}
+% 	\item<1->
+% 	Notice that the item effects are added
+% 	\item<2->
+%  	Everything else stays the same
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{How do we know if increasing \emph{model complexity} by adding predictors actually helps us to account for variation in outcome values?}{Simplicity and parsimony}
+\begin{itemize}
+ \item<1->
+	Trade-off between too much and too little simplicity in model selection -- variable selection
+	\begin{itemize}
+	\item<2->
+	Models with too many parameters may tend to identify effects that are spurious
+	\item<3->
+	Effects may be \emph{unintuitive} and hard to explain \emph{and} not reproduced in future samples
+	\end{itemize}			
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Akaike Information Criteria: \emph{AIC}}{Akaike showed you could estimate information loss in terms of the likelihood of the model given the data}
+% burnham & anderson 2001/p.3
+% baguleypp. 402 --
+\begin{equation}
+AIC = -2ln(l) + 2k
+\end{equation}
+\begin{itemize}
+	\item<1->
+	$-2ln(l)$ -2 times the log of the likelihood of the model given the data
+	\item<2->
+	$(l)$ -- likelihood
+	\begin{itemize}
+	\item<3->
+	Is proportional to the probability of observed data conditional on some hypothesis being true
+	\end{itemize}
+	\item<4->
+	$k$ -- is the number of parameters in the model
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Bayesian Information Criteria: \emph{BIC}}{Schwartz proposed an alternative estimate}
+% burnham & anderson 2001/p.3
+% baguleypp. 402 --
+\begin{equation}
+BIC = -2ln(l) + kln(N)
+\end{equation}
+\begin{itemize}
+	\item<1->
+	$-2ln(l)$ -- -2 times the log of the likelihood of the model given the data
+	\item<2->
+	$+ kln(N)$ -- is the number of parameters in the model times the log of the sample size
+	\item<3->
+	Crudely, the penalty for greater complexity is heavier in BIC
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Likelihood ratio test comparison}
+\begin{itemize}
+\item<1->
+The test statistic is the comparison of the likelihood of the simpler model with the more complex model
+\item<2->
+Comparison by division $2log\frac{likelihood-complex}{likelihood-simple}$
+\item<3->
+The likelihood ratio is compared to the $\chi^2$ distribution for a significance test
+\item<4->
+Assuming the null hypothesis that the simpler model is adequate
+\item<5->
+With degrees of freedom equal to the difference in the number of parameters of the models being compared  
+\end{itemize}  
+\end{frame}
+
+\begin{frame}{Model comparison}
+\begin{itemize}
+\item<1->
+AIC, BIC and LRT comparisons should be consistent in their indications -- which model to prefer
+\item<2->
+Can be tricky where dealing with complex sets of predictors -- indicators may diverge
+\item<3->
+Remember that BIC may penalise complexity more heavily -- especially if conducting exploratory research
+\item<4->
+Remember that may be obliged to include all effects built-in by design -- if conducting confirmatory study
+\end{itemize} 
+    \begin{figure}     
+     \includegraphics[scale=0.35]{RStudio-lmer-anova-ML-data}
+     \caption{Comparison of empty model with model with subject attribute predictors}
+    \end{figure}    
+\end{frame}
+
+\begin{frame}[fragile]{Model comparisons among mixed-effects models -- use \emph{anova()} function}
+\begin{verbatim}
+anova(full.lmer0, full.lmer1)
+\end{verbatim}
+\begin{itemize}
+	\item<1->
+	\verb:anova(...,....): -- compare pairs of models
+	\item<2->
+	\verb:full.lmer0: -- a simpler model -- more limited assumptions about sources of variance
+	\item<3->
+	\verb:full.lmer1: -- a more complex model -- more predictors -- includes simpler model as a special case
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Running the \emph{anova$(,)$} comparison will deliver AIC, BIC, and likelihood comparisons for varying models}
+    \begin{figure}     
+     \includegraphics[scale=0.5]{RStudio-lme-anova-ML-data-subject-item-effects}
+     \caption{Comparison of model with subject attribute predictors and model also with item effects}
+    \end{figure}     
+\end{frame}
+
+
+
+\section{Model selection and reporting standards}
+
+
+
+\begin{frame}[fragile]{Model selection and judgment}{Using Information Criteria statistics}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+	\item<1->
+	Compare a simpler model, example: model 0, just random effects on intercepts; model 1, just subject main effects; model 2, subject and item main effects
+	\item<2->
+	If the more complex model better approximates reality then it will be more likely given the data
+	\begin{itemize}
+	\item<3->
+	 AIC will be closer to negative infinity
+   % : $-2ln(l)$ will be larger	 
+	 \item<4->
+	 e.g. 10 is better than 1000, -1000 better than -10
+	\end{itemize}
+	\item<4->
+	Over and above any measure of the complexity of the model	
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Model selection and judgment}{Using AIC and BIC}
+\begin{itemize}
+	\item<1->
+	Compare a simpler model: model 1, just main effects; model 2, main effects plus interactions
+	\item<2->
+	If the more complex model better approximates reality then it will be more likely given the data
+	\begin{itemize}
+	\item<3->
+	AIC and BIC should move in the same direction -- usually will	 
+	\item<4->
+	AIC will tend to allow more complex models -- may be necessary when want more accurate predictions
+	\item<5->
+	BIC will tend to favour simpler models -- may be necessary when seek models that replicate over the long run 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Reporting standards}{Using AIC and BIC}
+% % burnham & anderson 2001/p.3
+% \begin{itemize}
+% 	\item<1->
+% 	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
+% 	\item<2->
+% 	Report the AIC or BIC for the different models
+% 	\begin{itemize}
+% 	\item<3->
+% 	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
+% 	\end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Reporting standards}{Likelihood Ratio Test comparisons}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+	\item<1->
+	Recommendations (Bates et al., 2015; glmm.wikidot) -- to compare models of varying complexity
+	\item<2->
+	Use Likelihood Ratio Test
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Reporting the individual predictor effects}{We don't get p-values for the effects estimates -- for good reason}
+% \begin{verbatim}
+% confint(full.lmer3, method = "Wald")
+% \end{verbatim}
+% \begin{itemize}
+% \item<1->
+% \verb:confint(full.lmer3): -- ask for confidence intervals for effect estimates -- if do not include 0 then significant
+% \item<2->
+% \verb:method = "Wald": -- can use different methods -- ``Wald'' is faster but alternatives
+% \item<3->
+% Can ask for differing levels of confidence
+% \end{itemize} 
+% \end{frame}
+% 
+% \begin{frame}[fragile]{Reporting the model}
+% \begin{itemize}
+% \item<1->
+% Summary of fixed effects -- just like in linear models -- with confidence intervals
+% \item<2->
+% Report random effects variance and covariance (if applicable)
+% \item<3->
+% In text, report likelihood comparisons
+% \end{itemize} 
+%     \begin{figure}     
+%      \includegraphics[scale=0.45]{R-GLMM-word-learning-project-summary}
+%      \caption{Model summary table -- word learning study -- Generalized Linear Mixed-effects model}
+%     \end{figure}    
+% \end{frame}
+
+
+
+
+\end{document}
