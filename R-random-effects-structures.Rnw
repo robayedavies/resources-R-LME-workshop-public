@@ -65,7 +65,9 @@
 \end{frame}
 
 
-\subsection{Evaluating models}
+
+\section{Evaluating models}
+
 
 
 \begin{frame}[fragile]{Linear mixed-effects models -- \alert{Model comparison approach}}{We focus on building a series of models from the simplest to the most complex model supported by the data}
@@ -81,36 +83,27 @@
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Evaluating models}{Simplicity and parsimony}
+\begin{frame}{Evaluating models}{Trade-off between too much and too little simplicity in model selection -- variable selection}
 \begin{itemize}
 	\item<1->
-	Trade-off between too much and too little simplicity in model selection -- variable selection
-	\begin{itemize}
-	\item<2->
 	Models with too few parameters -- included variables, effects -- have bias 
-	\item<3->
+	\item<2->
 	\alert{Bias} -- the estimate of the effect coefficient will not on average equal the true value of the coefficient in the population
-	% cohen/p.119	
-	\end{itemize}			
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Simplicity and parsimony}
+\begin{frame}{Simplicity and parsimony}{Trade-off between too much and too little simplicity in model selection -- variable selection}
 \begin{itemize}
 	\item<1->
-	Trade-off between too much and too little simplicity in model selection -- variable selection
-	\begin{itemize}
-	\item<2->
 	Models with too many parameters may tend to identify effects that are spurious
-	\item<3->
+	\item<2->
 	Effects may be \alert{unintuitive} and hard to explain \emph{and} not reproduced in future samples
 	% burnham & anderson 2001/p112 -- simplicity and parsimony, multiple working hypotheses, strength of evidence	
-	\end{itemize}			
 \end{itemize}
 \end{frame}
 
 
-\section{Model selection and information criteria}
+\subsection{Model selection and information criteria}
 
 
 \begin{frame}[fragile]{We can use Information Criteria statistics like AIC or BIC to evaluate models}{Understood within an approach: \alert{Information-theoretic methods}  -- for linear models we can compare the $F, R^2$ and information criteria indices}
