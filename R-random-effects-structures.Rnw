@@ -1,0 +1,1215 @@
+
+\documentclass{beamer}
+
+\mode<presentation>
+{
+  \usetheme{CambridgeUS}
+  % or ...
+
+  \setbeamercovered{transparent}
+  % or whatever (possibly just delete it)
+}
+
+
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+% Or whatever. Note that the encoding and the font should match. If T1
+% does not look nice, try deleting the line with the fontenc.
+\usepackage{amsmath}
+
+\graphicspath{{/Users/robdavies/Dropbox/resourcesimages/}}
+
+\title
+{PSYC 402 -- advanced statistics -- Class Six}
+
+\author
+{Rob Davies}
+
+\institute
+{r.davies1@lancaster.ac.uk}
+
+\date
+{Spring 2016}
+
+\subject{Statistics}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%\begin{frame}[allowframebreaks]
+%  \frametitle<presentation>{Outline}
+%  \tableofcontents
+%\end{frame}
+
+
+
+\section{Introduction}
+
+
+
+\subsection{Aims for the class}
+
+
+
+\begin{frame}{\emph{Targets for Class Five}}{Ideas and skills -- foundations for later work}
+  \begin{enumerate}
+  \item
+  Understand the motivation for \emph{linear mixed-effects models} -- the requirements of handling multilevel structured data
+  \item
+  Recognize alternative methods for analyzing multilevel structured data
+  \item
+  Practise running linear mixed-effects models in R
+%   \item
+%   Evaluating models -- $R^2$ or information criteria
+  \end{enumerate}  
+\end{frame}
+
+\begin{frame}{\emph{Targets for Class Six}}{Ideas and skills -- foundations for later work}
+  \begin{enumerate}
+  \item
+  Understand the use of \emph{Information Criteria} to evaluate models
+  \item
+  Practise running linear mixed-effects models with varying fixed or random effects structures
+  \item
+  Practise evaluating models to select the most useful
+  \end{enumerate}  
+\end{frame}
+
+
+
+\section{Introduction to Linear mixed-effects models}
+
+
+
+% \begin{frame}{Phenomena and data sets in the social sciences often have a multilevel structure}
+%      \begin{figure}     
+%       \includegraphics[scale=0.5]{LME-multistage-sample-snijders-fig2-1}
+%       \caption{Snijders \& Bosker (2012) Multistage sample}
+%      \end{figure}     
+% \end{frame}
+% 
+% \begin{frame}{\alert{Repeated measures} or \alert{clustered data}}{Done for practical reasons arising from statistical facts}
+% \begin{itemize}
+% \item<1->
+% Test the same people multiple times
+% \begin{itemize}
+% \item<2->
+% Pre and post treatment
+% \item<3->
+% Multiple stimuli -- everyone sees the same stimuli
+% \item<4->
+% Repeated testing -- follow learning, development within individuals -- in longitudinal designs
+% \end{itemize}
+% \item<5->
+% Do multi-stage sampling
+% \begin{itemize}
+% \item<6->
+% Find (sample) classes or schools -- test (sample) children within classes or schools
+% \item<7->
+% Find (sample) clinics -- test (sample) patients within clinics
+% \end{itemize}
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}{As we discussed last week, multilevel data require linear mixed-effects models}{These models can get quite complicated -- requiring an approach to evaluating different models based on \emph{information criteria} -- we consider what these are by beginning with more conventional methods for evaluating models}
+     \begin{figure}     
+      \includegraphics[scale=0.4]{LME-multistage-sample-snijders-fig2-1}
+      \caption{Snijders \& Bosker (2012) Multistage sample}
+     \end{figure}     
+\end{frame}
+
+
+% 220216 -- copy in tex from: PG-methods-slides-four.Rnw -- so can explain logic of model comparisons -- could not cover previously
+
+\section{Linear models and the accuracy of prediction}
+
+
+% -- skip tex on estimating slopes and minimizing residuals
+% -- see 402-advanced-statistics-class-three-270115.tex
+
+
+% -- following code copied in from: 401-statistics-multiple-regression-class-slides-151114.tex
+% -- not used but kept here because some utility for reference
+
+%\begin{frame}{To understand regression results you need to think about the estimated coefficient}{The coefficient of the slope tells us the rate of change in Y for unit increase in X}
+% \begin{columns}[T]
+%   \column{.6\textwidth}
+%  \begin{itemize}
+%    \item<1->
+%		``Increasing word frequency was associated with shorter response latencies ($B = -14.7, t  -3.7, p < 0.001$).''
+%		\item<2->
+%		This means that a word with frequency of 2 is estimated to elicit an RT 14.7ms less than a word with frequency of 1
+%	\end{itemize}
+%	\column{.4\textwidth}
+%\begin{figure}
+%		\includegraphics[scale=0.2]{SPSS-adult-reading-regression-output}
+%		\caption{\tiny{SPSS --adult reading -- regression -- output}}
+%		\end{figure} 
+% \end{columns}
+%\end{frame}
+%
+%\begin{frame}{Did you notice the ANOVA table in the regression model summary?}{Count out and describe the sources of variance in the regression}
+%\begin{itemize}
+%\item<1->
+%%$SS_X$ = variability in word frequency = $\sum(X-\bar{X})^2$
+%%\item<2->
+%$SS_Y$ = variability in response latency = $\sum(Y-\bar{Y})^2$
+%\item<2->
+%$SS_{\hat{Y}}$ = variability in reading latencies attributable to word frequency = $\sum(\hat{Y}-\bar{Y})^2$
+%\item<3->
+%$SS_{residual}$ = variability in reading latencies \emph{not} attributable to word frequency = $\sum(Y-\hat{Y})^2 = SS_Y - SS_{\hat{Y}}$
+%\end{itemize}
+%\begin{figure}
+%		\includegraphics[scale=0.15]{adults-reading-frequency-rt-lm-scatter-041114}
+%		\caption{\tiny{Davies et al. (in prep.): Effect of word frequency on by-items mean word naming latencies -- typically developing adult readers}}
+%		\end{figure}
+%\end{frame}
+%
+%\begin{frame}{What does $r^2$ mean?}
+%%{Variance in reading can be attributed in part to the relationship between reading and word frequency}
+%\begin{equation}
+%r^2 = \frac{SS_Y - SS_{residual}}{SS_Y} = \frac{SS_{\hat{Y}}}{SS_Y}
+%\end{equation}
+%\begin{itemize}
+%\item<1->
+%We can calculate $r^2$: the proportion of total variation in Y that is due to the relationship between Y (reading performance) and X (word frequency)
+%\end{itemize}
+%\end{frame}
+%
+%\begin{frame}{The usefulness of $r^2$}{It tells us how much variability in the outcome can be explained by or predicted from or associated with variability in the predictor independent variable}
+%\begin{figure}
+%		\includegraphics[scale=0.285]{adults-reading-frequency-rt-lm-scatter-041114}
+%		\caption{\tiny{Davies et al. (in prep.): Effect of word frequency on by-items mean word naming latencies -- typically developing adult readers}}
+%		\end{figure}
+%\end{frame}
+
+% -- skip tex on hypothesis testing in relation to estimates of regression coefficients, hypothesis testing and assumptions
+% -- see 402-advanced-statistics-class-three-270115.tex
+
+\begin{frame}{Model evaluation}{What is the logic of the $R^2$ and F-tests in regression? Recall: Imagine trying to predict values of Y when you knew nothing about X -- your best prediction for Y is then the mean value for Y, that is, $\bar{Y}$, and the error of prediction would be the spread of Y values about the mean -- \alert{the intercept}}
+\begin{equation}
+s_Y^2 = \frac{\sum(Y-\bar{Y})^2}{N-1} = \frac{SS_Y}{df}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Next we can think about how we could predict values of Y when we have values of X}{Recall: Our best prediction for Y is provided by the regression $\hat{Y} = \beta_0 + \beta_X$ and the error of prediction is the spread of Y values about the predicted outcome values. We call predicted outcomes $\hat{Y}$}
+\begin{equation}
+s_{Y.X}^2 = \frac{\sum(Y-\hat{Y})^2}{N-2} = \frac{SS_{residual}}{df}
+\end{equation}
+\begin{itemize}
+\item<1->
+$SS_{residuals}$ is \emph{the sum of squares of residuals}: the sum of squared deviations from the predicted outcomes $\hat{Y}$ 
+\item<2->
+It represents the variability that remains after we use X to predict Y
+%\item<3->
+%$s_{Y.X}$ is known as the \emph{standard error of the estimate}
+%\item<4->
+%$s_{Y.X}^2$ is the \emph{residual error variance}
+%\item<5->
+%We have $n-2$ degrees of freedom (df) because we used two to estimate the slope and the intercept in the regression
+\end{itemize}
+\end{frame}
+
+\begin{frame}{How good is the model?}{$r^2$ gives us the proportion of variability in Y that can be explained by the model i.e. the relationship between X and Y}
+\begin{equation}
+r^2 = \frac{SS_Y - SS_{residual}}{SS_Y}
+\end{equation}
+\begin{itemize}
+\item<1->
+Variation in Y -- sums of squares of Y $SS_Y$ equals:
+\item<2->
+That part of the variability in Y due to the relationship between X and Y
+\item<3->
+Plus $SS_{residual} = $ the part of variance in Y \alert{not} due to the relationship between X and Y
+\end{itemize}
+\end{frame}
+
+% Field/301
+% The improvement in prediction resulting from using the regression model rather than the mean is calculated by calculating the difference between SS_T and SS_R i.e. between total variance and residual variance.
+% This difference shows us the the reduction in the inaccuracy of the model resulting from fitting the regression model to the data.
+% The total sums of squares uses the differences between the observed data and the mean value for Y.
+% The residual SS uses the difference between the observed and the predicted Y.
+% The model sums of squares uses the differences between the mean Y and the predicted Y: i.e. $\sum(\hat{Y}-\bar{Y})^2$
+
+% $r^2$ will account for a high percentage of total outcome variance if the model is useful -- If a lot of variation in the outcome is predicted by differences due to X then residuals will be small
+
+\begin{frame}{F is the ratio comparing systematic variance (model) to error variance -- as in ANOVA}
+% -- i.e. we compare an estimate of variance based on the model (differences in outcome due to differences between conditions i.e. levels of X) with an estimate of error based on the difference between observed and predicted outcome values
+\begin{equation}
+F = \frac{MS_{regression}}{MS_{residual}}
+\end{equation}
+\begin{itemize}
+\item<1->
+$MS_{regression}$ estimates the difference between (1.) having a model or (2.) knowing just the mean outcome to predict outcome variation
+\item<2->
+$MS_{residual}$ estimates the difference between model predictions of the outcome and observed outcome values
+\item<3->
+F compares the two estimates -- if the model is useful then the difference it makes will be large and residuals will be small 
+% -- so F will be large
+\end{itemize}
+\end{frame}
+
+
+
+% -- add in tex from: 402-advanced-statistics-class-four-030215.tex
+% -- outline the model comparison approach
+
+\section{Linear models -- model comparison approach}
+
+
+
+% \begin{frame}[fragile]{Linear models -- \alert{Model comparison approach}}{We focus on building a series of models up to the most complex model supported by the data}
+%      \begin{figure}     
+%       \includegraphics[scale=0.16]{scatterplots-ML-RT-by-main-effects}
+%      \end{figure}
+% \end{frame}
+
+\begin{frame}[fragile]{Linear models and linear mixed-effects models -- \alert{Model comparison approach}}{We focus on building a series of models from the simplest to the most complex model supported by the data}
+\begin{itemize}
+  \item<1->
+	A minimal model -- data observed can be predicted only by the average of observations -- the intercept
+	\item<2->
+	Observed values are then random deviations from the average
+	\item<3->
+	Will our our capacity to predict observations be improved by adding other terms?
+	\item<4->
+	Factors we manipulate or predict should influence outcomes	
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluating models}{Simplicity and parsimony}
+\begin{itemize}
+	\item<1->
+	Trade-off between too much and too little simplicity in model selection -- variable selection
+	\begin{itemize}
+	\item<2->
+	Models with too few parameters -- included variables, effects -- have bias 
+	\item<3->
+	\alert{Bias} -- the estimate of the effect coefficient will not on average equal the true value of the coefficient in the population
+	% cohen/p.119	
+	\end{itemize}			
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Simplicity and parsimony}
+\begin{itemize}
+	\item<1->
+	Trade-off between too much and too little simplicity in model selection -- variable selection
+	\begin{itemize}
+	\item<2->
+	Models with too many parameters may tend to identify effects that are spurious
+	\item<3->
+	Effects may be \alert{unintuitive} and hard to explain \emph{and} not reproduced in future samples
+	% burnham & anderson 2001/p112 -- simplicity and parsimony, multiple working hypotheses, strength of evidence	
+	\end{itemize}			
+\end{itemize}
+\end{frame}
+
+
+\section{Model selection and information criteria}
+
+
+\begin{frame}[fragile]{We can use Information Criteria statistics like AIC or BIC to evaluate models}{Understood within an approach: \alert{Information-theoretic methods}  -- for linear models we can compare the $F, R^2$ and information criteria indices}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+	\item<1->
+	\alert{Information-theoretic methods} are grounded in the insight that researchers have reality and have approximating models
+	\item<2->
+	The distance between a model and reality corresponds to the `information lost' when you use a model to approximate reality
+	\item<3->
+	Information criteria -- AIC or BIC -- estimates of \alert{information loss}
+	\item<4->
+	The process of model selection aims to minimise information loss
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Akaike Information Criteria: \alert{AIC}}{Akaike showed you could estimate information loss in terms of the likelihood of the model given the data}
+% burnham & anderson 2001/p.3
+% baguleypp. 402 --
+\begin{equation}
+AIC = -2ln(l) + 2k
+\end{equation}
+\begin{itemize}
+	\item<1->
+	$-2ln(l)$ -2 times the log of the likelihood of the model given the data
+	\item<2->
+	$(l)$ -- likelihood
+	\begin{itemize}
+	\item<3->
+	Is proportional to the probability of observed data conditional on some hypothesis being true
+	\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Akaike Information Criteria: \alert{AIC}}{Akaike showed you could estimate information loss in terms of the likelihood of the model given the data}
+% burnham & anderson 2001/p.3
+% baguleypp. 402 --
+\begin{equation}
+AIC = -2ln(l) + 2k
+\end{equation}
+\begin{itemize}
+	\item<1->
+%	$-2ln(l)$ -2 times the log of the likelihood of the model given the data
+%	\item<2->
+%	$(l)$ -- likelihood
+%	\begin{itemize}
+%	\item<3->
+%	Is proportional to the probability of observed data conditional on some hypothesis being true
+%	\end{itemize}
+%	\item<4->
+%	So: information loss -- AIC -- how likely is the model given the data
+%	\item<4->
+	You want a more likely model -- less information loss -- closer to reality -- you want more negative or lower AIC
+	\item<2->
+	You can link models that are more likely -- closer to reality -- with models with smaller residuals
+  \item<3->
+  Linear models with smaller residuals would have larger $R^2$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Bayesian Information Criteria: \alert{BIC}}{Schwartz proposed an alternative estimate}
+% burnham & anderson 2001/p.3
+% baguleypp. 402 --
+\begin{equation}
+BIC = -2ln(l) + kln(N)
+\end{equation}
+\begin{itemize}
+	\item<1->
+	$-2ln(l)$ -- -2 times the log of the likelihood of the model given the data
+	\item<2->
+	$+ kln(N)$ -- is the number of parameters in the model times the log of the sample size
+	\item<3->
+	Crudely, the penalty for greater complexity is heavier in BIC
+  \item<4->
+	Models with more parameters may fit the data better but some of those effects may be spurious
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Model selection and judgment: \emph{Information-theoretic methods} are grounded in the insight that you have reality and you have approximating models}
+%{Using AIC and BIC}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+	\item<1->
+	Compare models varying in fixed effects: model 1, just main effects; model 2, main effects plus interactions
+	\item<2->
+  Compare models varying in random effects: model 1, just random effect of subjects on intercepts; model 2, random effects of subjects and items on intercepts
+  \item<3->
+	If the more complex model better approximates reality then it will be more likely given the data
+	\begin{itemize}
+	\item<4->
+	 BIC or AIC will be closer to negative infinity: $-2ln(l)$ will be larger	 
+	 \item<5->
+	 e.g. 10 is better than 1000, -1000 better than -10
+	\end{itemize}
+% 	\item<4->
+% 	Over and above any measure of the complexity of the model	
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Model selection and judgment}{Using AIC and BIC}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+% 	\item<1->
+% 	Compare a simpler model -- model 1, just main effects -- and a more complex -- model 2, main effects plus interactions
+% 	\item<2->
+% 	If the more complex model better approximates reality then it will be more likely given the data
+% 	\begin{itemize}
+	\item<3->
+	 AIC and BIC should move in the same direction -- usually will	 
+	 \item<4->
+	AIC will tend to allow more complex models -- may be necessary when want more accurate predictions
+	\item<5->
+	BIC will tend to favour simpler models -- may be necessary when seek models that replicate over the long run 
+%	\end{itemize}
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Reporting standards}{Using AIC and BIC}
+% % burnham & anderson 2001/p.3
+% \begin{itemize}
+% 	\item<1->
+% 	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
+% 	\item<2->
+% 	Report the AIC or BIC for the different models
+% 	\begin{itemize}
+% 	\item<3->
+% 	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
+% 	\end{itemize}
+% \end{itemize}
+% \end{frame}
+
+
+
+% -- add in tex from: 402-class-seven-230215.tex
+% -- outline the model sequence context
+
+
+
+\section{Dealing with clustered data -- by adding Random Effects}
+
+
+
+%\begin{frame}[fragile]{Dealing with clustered data -- by \alert{adding Random Effects}}
+%%{Taking into account random effects}
+%     \begin{figure}     
+%      \includegraphics[scale=0.175]{learners-summary-EDA-RT-010314}
+%      \caption{RT distributions -- per person -- thick grey line shows overall average}
+%     \end{figure}
+%\end{frame}
+
+\begin{frame}[fragile]{A more realistic repeated measures model of word frequency and reading ability effects}{Taking into account random effect of subjects and items}
+\footnotesize{\begin{equation}
+	RT = \beta_0 +  \beta_{ability} + \beta_{frequency} + \beta_{ability*frequency} +  
+	\alert{\beta_{subject}} + \beta_{item} + \alert{\beta_{subject*frequency}} + \beta_{item*ability} + \epsilon
+\end{equation}}
+{}
+\begin{itemize}
+	\item<1->
+	What about effect of random variation between participants?
+		\begin{itemize}
+		\item<2->
+		Allow \alert{intercept to vary} -- random effect of subject -- some have slower average some have faster average than average overall
+		\item<3->
+		Allow \alert{effect of frequency to vary} -- random effect of subject -- subjects can be affected by word frequency in different ways
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{A more realistic repeated measures model of the item type and reading ability effects}{Taking into account random effects of subjects and items}
+	\footnotesize{\begin{equation}
+	RT = \beta_0 +  \beta_{ability} + \beta_{frequency} + \beta_{ability*frequency} + 
+	\beta_{subject} + \alert{\beta_{item}} + \beta_{subject*frequency} + \alert{\beta_{item*ability}} + \epsilon
+	\end{equation}}
+\begin{itemize}
+	\item<1->
+	What about effect of random variation between stimuli?
+		\begin{itemize}
+		\item<2->
+		Allow \alert{intercept to vary} -- random effect of items -- some items harder and elicit slower average response than others
+		\item<3->
+		Allow effect of reading ability to vary -- random effect of items?
+		% -- responses to some items could be more or less susceptible to effect of subject ability
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% rely on -- LME-181013-291013-051113.tex
+% with some edits from -- 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%R-- Reading MLM starts about here:
+%R-- traditional statistical models like OLS regression require independent observations
+%[-- might want to illustrate the by-subjects or items clustering of data
+%R-- so in OLS the covariance matrix of the residuals is assumed to be diagonal -- yet there are patterns of correlation in multilevel data
+%R-- in multilevel models the covariance matrix is not diagonal -- presume they mean only nonzero entries in diagonal -- but block diagonal i.e. with \tau_0^2 + \sigma^2 in diagonal an \tau_0^2 off centre
+
+
+% -- the intercept but not the coefficient is allowed to depend on group
+
+
+%\begin{frame}{Can start to model between-group variability by letting the intercept vary between groups -- change annotation}
+%
+%	\begin{equation}
+%			Y_{ij} = \gamma_{00} + \gamma_{10}X_{ij} + U_{0j} + R_{ij}
+%	\end{equation}
+%
+%\begin{itemize}
+%	\item<1->
+%	intercept now $\gamma_{00}$ while coefficient for X is $\gamma_{10}$ and $ U_{0j}$ are the main effects of the groups
+%\end{itemize}
+%
+%     \begin{figure}     
+%      \includegraphics[scale=0.3]{LME-random-intercepts-snijders-fig4-1}
+%      \caption{Snijders \& Bosker (2012) different parallel regression lines}
+%     \end{figure}     
+%
+%\end{frame}
+
+
+% 240214 -- note that bring equation formula into line with baguley/p.731 -- as more consistent with foregoing and easier to follow
+
+
+% \begin{frame}{We can start to model between-group variability by letting the \alert{intercept} vary between groups}{For example, account for random differences between the average reading speed of individual participants (red lines) compared to the group average overall (blue line)}
+% % {\alert{Group as a fixed effect}}
+% %	\begin{equation}
+% %			Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + \epsilon_{ij}
+% %	\end{equation}
+% %\begin{itemize}
+% %	\item<1->
+% %	$\beta_{0}$ -- the common intercept -- the overall average
+% %	\item<2->
+% %	$U_{0,j}$ -- the adjustments to the overall average required to model variation in averages per group
+% %	\begin{itemize}
+% %	\item<3->
+% %	e.g. variation in average per subject -- $j$ variations in the average -- for $j$ people or groups
+% %	\end{itemize}
+% %\end{itemize}
+%      \begin{figure}     
+%       \includegraphics[scale=0.3]{learners-persubj-oneplot-random-intercepts-freq-RT-010314}
+%     % \caption{\small{Adult learners and typically developing adult readers -- effect of frequency per subject (lines in red) -- overall effect (line in blue) -- note variation in intercepts}}
+%      \end{figure} 
+% \end{frame}
+
+\begin{frame}{Random effect of subjects on \alert{intercepts}}{Differences in individuals' average response speed compared to the group average}
+% {\alert{Group as a fixed effect}}
+	\begin{equation}
+			Y_{ij} = \beta_{0} + \beta_{1}X_i + \alert{U_{0,j}} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+	\item<1->
+	$\beta_{0}$ common intercept, average outcome given the other effects
+	\item<2->
+	\alert{$U_{0,j}$} adjustments to the intercept required to explain differences between common average and average for each $j$ individual
+% 	\begin{itemize}
+% 	\item<3->
+% 	variations in the average -- for $j$ people or groups
+%	e.g. variation in average per subject -- $j$ variations in the average -- for $j$ people or groups
+% 	\end{itemize}
+\end{itemize}
+     \begin{figure}     
+      \includegraphics[scale=0.165]{learners-persubj-oneplot-random-intercepts-freq-RT-010314}
+    % \caption{\small{Adult learners and typically developing adult readers -- effect of frequency per subject (lines in red) -- overall effect (line in blue) -- note variation in intercepts}}
+     \end{figure} 
+\end{frame}
+
+% \begin{frame}{We can allow for random variation in the intercepts and in the \alert{slopes} of the effects of fixed factors}{Allow for variation in e.g. frequency effect on RTs over subjects}
+% % {Random intercepts and slopes}
+% \begin{figure}     
+%       \includegraphics[scale=0.3]{learners-persubj-oneplot-random-intercepts-slopes-freq-RT-010314}
+%       \caption{Individual differences in effect of word frequency on RTs}
+%      \end{figure}  
+% \end{frame}    
+
+\begin{frame}{Random effect of subjects on \alert{slopes} of fixed effects}{Accounting for variation in \emph{within-subjects} frequency effect on RTs}
+	\begin{equation}
+			Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + \alert{U_{1,j}} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+	\item<1->
+	$\beta_{1}X_i$ the group average frequency effect
+	\item<2->
+ 	\alert{$U_{1,j}$} adjustments required to model differences between group average frequency effect and frequency effect for each $j$ individual
+% 	\begin{itemize}
+% 	\item<3->
+% 	variations in the effect -- for $j$ people or groups
+% 	\end{itemize}
+\end{itemize}
+\begin{figure}     
+      \includegraphics[scale=0.165]{learners-persubj-oneplot-random-intercepts-slopes-freq-RT-010314}
+      \caption{Individual differences in effect of word frequency on RTs}
+     \end{figure}
+\end{frame} 
+
+\begin{frame}{Can allow random effects of both subjects and items}{Solving the `language-as-fixed-effect' problem in one model}
+	\begin{equation}
+			Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + U_{1,j} + \alert{W_{0,i}}+ \alert{W_{1,i}} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+	\item<1->
+	$\alert{W_{0,i}}$ random effect of items on intercepts -- where $W$ terms correspond to random effects of items
+	\item<2->
+ 	$\alert{W_{1,i}}$ may require a random effect of items on slopes of within-items effects e.g. effect of ability differences between participants
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Mixed effects models -- both \alert{fixed} effects and \alert{random} effects}
+\begin{equation}
+			Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + U_{1,j} + W_{0,i} + W_{1,i} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+	\item<1->
+	$\beta_{0} + \beta_1X_i$ fixed effect of predictors -- \alert{fixed} because replicable by manipulation or selection
+	\item<2->
+	$U_{0,j} + U_{1,j} +  + W_{0,i} + W_{1,i} + \epsilon_{ij}$ random effects of group on intercepts and slopes -- \alert{random} because differences due to sampling 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{We could model random differences between participants items as fixed effects but we do not}{We incorporate random effects terms in models to capture the spread, \emph{the variance}, associated with random differences in intercepts or slopes}
+% -- linear mixed-effects model summaries show you estimates of fixed effects \emph{coefficients} and random effects \emph{variances} and \emph{covariances}}
+\begin{equation}
+  		Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + U_{1,j} + W_{0,i} + W_{1,i} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+	\item<1->
+	$\sigma_{U_{0,j}}^2 + \sigma_{U_{1,j}}^2 + \sigma_{U_{0,j}U_{1,j}}^2$ variances and \alert{covariance} of random effects
+	\item<2->
+  $\sigma_{W_{0,j}}^2 + \sigma_{W_{1,j}}^2 + \sigma_{W_{0,j}W_{1,j}}^2$variances and \alert{covariance} of random effects
+  \item<3->
+  $\sigma_{\epsilon_{ij}}^2$ residuals -- error variance left over
+  \item<4->
+	Covariances are included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions
+% 	\item<4->
+% 	Tackling random effects best handled by testing need for the random effects as terms in a series of models
+\end{itemize}
+\end{frame}
+
+%\begin{frame}
+%\end{frame}
+
+
+
+\section{Linear mixed-effects models and estimation methods}
+
+
+
+% \begin{frame}[fragile]{Maximum likelihood estimation}{REML and ML estimation and model comparison}
+% \begin{verbatim}
+% full.lmer0 <- lmer(logrt ~
+%                      
+%                      (1|subjectID) + (1|item_name),
+%                    
+% data = subjects.behaviour.items.nomissing, REML = F)
+% \end{verbatim}
+% \begin{itemize}
+% 	\item<1->
+% 	\verb:REML = F: -- maximum likelihood estimation
+% 	\item<2->
+%  	\alert{Maximum likelihood estimation} seeks to find those parameter values that, given the data and our choice of model, make the model's predicted values most similar to the observed values
+% \end{itemize}
+% \end{frame}
+
+%%Snijders and boskers/p. 89
+
+\begin{frame}[fragile]{Estimation methods}{An intuitive account of estimation in mixed-effects models}
+\begin{itemize}
+	\item<1->
+	If we knew the random effects, we could find the fixed effects estimates by minimising differences between predicted and observed outcomes -- like linear modelling
+	\item<2->
+ 	If we knew the fixed effects -- the regression coefficients -- we could work out the residuals and the random effects
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Estimation methods}{An intuitive account of estimation in mixed-effects models}
+\begin{itemize}
+	\item<1->
+	At the start, we know neither, but we can move between partial estimation of fixed and random effect in an \alert{iterative approach}
+	\begin{itemize}
+	\item<2->
+	Using provisional values for the fixed effects to estimate the random effects
+	\item<3->
+	Using provisional values for the random effects to estimate the fixed effects again
+	\item<4->
+	To \alert{converge} on the maximum likelihood estimates of effects -- when the estimates stop changing
+	\end{itemize}	
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Restricted maximum likelihood ($REML=TRUE$) and maximum likelihood ($REML=FALSE$) methods}
+\begin{itemize}
+	\item<1->
+	Restricted maximum likelihood ($REML=TRUE$)
+	\begin{itemize}
+	\item<2->
+	REML estimates the variance components while taking into account the loss of degrees of freedom resulting from the estimation of the fixed effects
+	\item<3->
+	\alert{REML estimates vary if the fixed effects vary}
+%	\item<4->
+%	Therefore not recommended to compare the \alert{likelihood} of models varying in fixed effects fitted using REML (Pinheiro \& Bates, 2000)
+%	% pinheiro & bates 2000 / p.76
+%	\end{itemize}	
+%	\item<5->
+%	REML method recommended for comparing the likelihood of models with \emph{the same fixed effects} but \emph{different random effects}
+%	% snijders & boskers p.60
+%	\begin{itemize}
+%	\item<6->	
+%	REML more accurate for random effects estimation
+%	% snijders & boskers p.89
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Restricted maximum likelihood ($REML=TRUE$) and maximum likelihood ($REML=FALSE$) methods}
+\begin{itemize}
+	\item<1->
+	\alert{REML estimates vary if the fixed effects vary}
+	\item<2->
+	Therefore not recommended to compare the \alert{likelihood} of models varying in fixed effects fitted using REML (Pinheiro \& Bates, 2000)
+	\item<3->
+	REML method recommended for comparing the likelihood of models with \emph{the same fixed effects} but \emph{different random effects}
+  \item<4->
+  ML method \verb:REML= FALSE: recommended for comparing models with \emph{different fixed effects} but \emph{the same random effects}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Model comparisons among mixed-effects models fitted using maximum likelihood ($REML=FALSE$) method}
+\begin{verbatim}
+full.lmer.0 <- lmer(logrt ~
+                     
+(1|subjectID) + (1|item_name),
+                   
+data = ML.all.correct, REML = F)
+\end{verbatim}
+\begin{itemize}
+	\item<1->
+	Maximum likelihood ($REML=FALSE$)
+	\begin{itemize}
+	\item<2->
+	ML estimation methods can be used to fit models with varying fixed effects but the same random effects
+% 	\item<3->
+% 	ML estimation: a good place to start when building-up model complexity -- adding fixed effects to an empty model
+	% P & B 2000 advise that approach is anti conservative but barr et al 2013 argue not so
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examine the fixed effects then the random effects}{Start by examining models varying in the \emph{fixed effects} but constant in the \emph{random effects}}
+\begin{itemize}
+	\item<1->
+	Compare maximum likelihood ($REML=FALSE$) models varying in fixed effects
+	\begin{itemize}
+	\item<2->
+	Think about simpler models as simplifications or subsets of more complex models
+	\end{itemize}
+	\item<3->
+	Add effects of interest in blocks or sets of predictors
+  %-- because they were manipulated, are of theoretical or practical interest -- fixed effects models in series	
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Compare maximum likelihood models with varying fixed effects but the same random effects}
+\begin{verbatim}
+full.lmer.1 <- lmer(logrt ~
+                  
+  zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + 
+  
+  (1|subjectID) + (1|item_name),
+                   
+  data = ML.all.correct, REML = FALSE)
+                   
+summary(full.lmer.1)
+\end{verbatim}
+\begin{itemize}
+  \item<1->
+	\verb:zAge + zTOWRE_wordacc + zTOWRE_nonwordacc +: add fixed effects
+	\item<2->
+	\verb:(1|subjectID) + (1|item_name): to random effects of subjects and items on intercepts
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Compare the model 1 with just subject effects to the model 2 also with item effects}
+\footnotesize{\begin{verbatim}
+full.lmer.2 <- lmer(logrt ~
+                     
+zAge + zTOWRE_wordacc + zTOWRE_nonwordacc +
+                                
+item_type + zLength + zOrtho_N +
+                     
+(1|subjectID) + (1|item_name),
+                                        
+data = ML.all.correct, REML = F)
+                   
+summary(full.lmer.2)
+\end{verbatim}}
+\begin{itemize}
+  \item<1->
+	\verb:item_type + zLength + zOrtho_N: add item effects
+	\item<2->
+ 	Everything else stays the same
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Compare model 2 with subject and item effects to model 3 specifying interactions between subject and item effects}
+\footnotesize{\begin{verbatim}
+full.lmer.3  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (1|subjectID) + (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3)
+\end{verbatim}}
+\begin{itemize}
+  \item<1->
+	Notice that the \verb:(something)*(something): get you interactions and main effects for all possible pairs of variables in the first set \verb:(zAge + zTOWRE_wordacc + zTOWRE_nonwordacc): and the second set \verb:(item_type + zLength + zOrtho_N): of predictors
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{How do we know if increasing \emph{model complexity} by adding predictors actually helps us to account for variation in outcome values?}{We can use the \emph{anova()} function to do the comparison}
+\begin{verbatim}
+anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3)
+\end{verbatim}
+\begin{itemize}
+  \item<1->
+	\verb:anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3): compare the named models in pairs
+% 	\item<2->
+% 	Results present information criteria statistics for each model and \emph{likelihood ratio test} comparison 
+\end{itemize}  
+\end{frame}
+
+\begin{frame}[fragile]{See that \emph{anova()} results present information criteria statistics for each model plus \emph{likelihood ratio test} comparisons}{Each step increase in complexity appears warranted by improved model fit to data}
+     \begin{figure}     
+      \includegraphics[scale=0.5]{ML-items-nomissing-LME-anova}
+      \caption{Model comparisons}
+     \end{figure}    
+\end{frame}
+
+\begin{frame}{Likelihood ratio test comparison}{AIC, BIC and LRT comparisons should be consistent in their indications -- which model to prefer}
+\begin{itemize}
+\item<1->
+The test statistic is the comparison of the likelihood of the simpler model with the more complex model
+\item<2->
+Comparison by division $2log\frac{likelihood-complex}{likelihood-simple}$
+\item<3->
+The likelihood ratio is compared to the $\chi^2$ distribution for a significance test
+\item<4->
+Assuming the null hypothesis that the simpler model is adequate
+\item<5->
+With degrees of freedom equal to the difference in the number of parameters of the models being compared  
+\end{itemize}  
+\end{frame}
+
+% \begin{frame}{Likelihood ratio test (LRT) comparison}
+% \begin{itemize}
+% \item<1->
+% AIC, BIC and LRT comparisons should be consistent in their indications -- which model to prefer
+% \item<2->
+% Can be tricky where dealing with complex sets of predictors -- indicators may diverge
+% \item<3->
+% Remember that BIC may penalise complexity more heavily -- especially if conducting exploratory research
+% \item<4->
+% Remember that may be obliged to include all effects built-in by design -- if conducting confirmatory study
+% \end{itemize} 
+%      \begin{figure}     
+%       \includegraphics[scale=0.35]{RStudio-lmer-anova-ML-data}
+%       \caption{Comparison of empty model with model with subject attribute predictors}
+%      \end{figure}    
+% \end{frame}
+
+% \subsection{Exploratory and confirmatory studies}
+
+\begin{frame}{The distinction between exploratory and confirmatory studies may be useful here}{Cumming (2014): between \emph{pre specified} and \emph{exploratory} or \emph{question answering} and \emph{question formulating} studies}
+\begin{itemize}	
+	\item<1->
+	Confirmatory -- pre specified -- models test the effects of the variables or conditions you manipulated
+	\item<2->
+	Exploratory -- question formulating -- models may be developed by building up complexity, with initially no clear idea about predictions
+% 	\item<3->
+% %	Differences in how plan, execute, analysis and interpretation of data
+% %	\item<4->
+% 	Category distinction breaks down
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examine the random effects}{When the goal of a \alert{confirmatory} analysis is to test hypotheses about one or more critical fixed effects, what random-effects structure should one use?}
+\begin{itemize}
+	\item<1->
+	Current recommendations (Barr et al., 2013; JML): \alert{Maximal random effects structure}
+	\item<2->
+	If you are testing effects manipulated according to a prespecified -- confirmatory study -- design
+	\begin{itemize}
+	\item<3->
+	Test random intercepts -- subjects and items
+	\item<4->
+	Test random slopes for all within-subjects or within-items fixed effects	
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Current recommendations (Barr et al., 2013; JML): \alert{Maximal random effects structure} -- what does this involve?}{Conceptually, we are working within a framework where we consider a range of potential random effects}
+\begin{equation}
+    	Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + U_{1,j} + W_{0,i} + W_{1,i} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+  \item<1->
+	$\sigma_{U_{0,j}}^2 + \sigma_{U_{1,j}}^2 + \sigma_{U_{0,j}U_{1,j}}^2$ variances and \alert{covariance} of random effects
+	\item<2->
+  $\sigma_{W_{0,j}}^2 + \sigma_{W_{1,j}}^2 + \sigma_{W_{0,j}W_{1,j}}^2$variances and \alert{covariance} of random effects
+  \item<3->
+  $\sigma_{\epsilon_{ij}}^2$ residuals -- error variance left over
+  \item<4->
+	Covariances are included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Random slopes of what?}{If a fixed effect is manipulated within-units then random effects of those units on intercepts and on the slopes of the within-units fixed effect should be examined}
+% but if it is manipulated between units then only random effects of those units on intercepts may be required}
+\begin{itemize}	
+	\item<1->
+	It makes sense to allow for variation in the effects of variables that are manipulated \emph{within-subjects}
+	\begin{itemize}	
+	\item<2->
+	If everyone sees the same words and you are testing the effect of word attributes then the effects of those variables are \emph{within-subjects}
+% 	\item<3->
+% 	Consider: you have 104 observations for a person, \emph{within} the variation in RT for that person the relative frequency of a word may or may not be associated with change in the RTs of their responses
+	\end{itemize}
+	\item<3->
+	What about effects that may vary \emph{within-items}?
+%	\begin{itemize}	
+%	\item<5->
+%	Evidently, it would not make sense to consider the random effect of items on the slope of the effect of frequency -- how could we ask if words vary in their sensitivity to a frequency effect?
+%	\item<6->
+%	But consider: if you were testing the response of participants to words presented under different priming conditions -- there you might sensibly examine the random effect of items on the slope of the priming effect
+%	\end{itemize}
+	\end{itemize}
+\end{frame}
+
+% \begin{frame}{Random slopes of what?}
+% \begin{itemize}	
+% 	\item<1->
+% 	What about effects that may vary \emph{within-items}?
+% 	\begin{itemize}	
+% 	\item<2->
+% 	Evidently, it would not make sense to consider the random effect of items on the slope of the effect of frequency -- how could we ask if words vary in their sensitivity to a frequency effect?
+% 	\item<3->
+% 	But consider: if you were testing the response of participants to words presented under different priming conditions -- there you might sensibly examine the random effect of items on the slope of the priming effect
+% 	\end{itemize}
+% 	\end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Examine the utility of random effects by comparing REML models with the same fixed effects but varying random effects}{You can begin with random effects of subjects and items on intercepts}
+\footnotesize{\begin{verbatim}
+full.lmer.3  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (1|subjectID) + (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3)
+\end{verbatim}}
+\begin{itemize}
+	\item<1->
+	Notice that $REML = TRUE$ -- we are focused on accurate comparisons of the random effects component
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Compare a model with both random effects of subjects and items on intercepts to a model with just the random effect of items on intercepts}
+\footnotesize{\begin{verbatim}
+full.lmer.3.i  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3.i)
+\end{verbatim}}
+\begin{itemize}
+	\item<1->
+	\verb:(1|item_name): a comparison with the model including both random intercepts will tell us if the inclusion of the random effect of subjects on intercepts helps the model to fit the data better
+  \item<2->
+  Repeat the comparison but for a second model including a random effect of subjects but not of items on intercepts to examine if the random effect of items on intercepts is required
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examine the utility of random effects of subjects on slopes of fixed effects are required}
+\footnotesize{\begin{verbatim}
+full.lmer.3.slopes  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (item_type + zLength + zOrtho_N + 1|subjectID) + (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3.slopes)
+\end{verbatim}}
+\begin{itemize}
+  \item<1->
+	\verb:(item_type + zLength + zOrtho_N + 1|subjectID): we specify a random effect of subjects on intercepts and on the slopes of the item type, length and neighbourhood effects
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{How do we know if increasing \emph{model complexity} helps us to account for variation in outcome values?}{We can use the \emph{anova()} function to compare models with or without the random effect of subjects on the slopes of the within-subjects fixed effects}
+\begin{verbatim}
+anova(full.lmer.3, full.lmer.3.slopes)
+\end{verbatim}
+     \begin{figure}     
+      \includegraphics[scale=0.5]{ML-items-nomissing-LME-anova-slopes-comparison}
+      \caption{Comparison of models with vs. without random effects of subjects on slopes of fixed effects}
+     \end{figure} 
+\end{frame}
+
+
+
+\section{Model comparison and selection}
+
+
+
+\begin{frame}{\alert{Model comparison and selection}}{Remember: Simplicity and parsimony}
+\begin{itemize}
+	\item<1->
+	Trade-off between too much and too little simplicity in model selection -- variable selection
+%	\begin{itemize}
+%	\item<2->
+%	Models with too many parameters may tend to identify effects that are spurious
+%	\item<3->
+%	Effects may be \alert{unintuitive} and hard to explain \emph{and} not reproduced in future samples
+%	% burnham & anderson 2001/p112 -- simplicity and parsimony, multiple working hypotheses, strength of evidence	
+%	\end{itemize}
+	\item<2->
+	Building random slopes into your model may reveal that there is quite a bit of variation in some effects -- enough random variation to explain away what you thought were effects that otherwise appear significant
+  %\emph{but that variation may be of interest}	
+	\item<3->
+	Estimation procedures may run into \alert{convergence problems} where there is too much model complexity and not enough data
+\end{itemize}
+\end{frame}
+
+% -- 220216 cut tex from 402-class-seven-230215.tex that recaps information criteria
+
+\begin{frame}[fragile]{Model selection and judgment}{Using AIC and BIC}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+  \item<1->
+	Compare a simpler model: model 1, just main effects; model 2, main effects plus interactions
+  \item<1->
+  Compare a simpler model: model 1, just fixed effects and random intercepts; model 2, fixed effects, random intercepts and random slopes
+	\item<2->
+	If the more complex model better approximates reality then it will be more likely given the data
+	\begin{itemize}
+	\item<3->
+	 AIC and BIC should move in the same direction -- usually will	 
+	\item<3->
+   Likelihood ratio test comparison is very popu,ar
+% 	AIC will tend to allow more complex models -- may be necessary when want more accurate predictions
+% 	\item<5->
+% 	BIC will tend to favour simpler models -- may be necessary when seek models that replicate over the long run 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+%\begin{frame}[fragile]{Reporting standards}{Using AIC and BIC}
+%% burnham & anderson 2001/p.3
+%\begin{itemize}
+%	\item<1->
+%	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
+%	\item<2->
+%	Report the AIC or BIC for the different models
+%	\begin{itemize}
+%	\item<3->
+%	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
+%	\end{itemize}
+%\end{itemize}
+%\end{frame}
+
+% \begin{frame}[fragile]{Model comparisons among mixed-effects models -- Likelihood Ratio Test}
+% \begin{verbatim}
+% anova(full.lmer0, full.lmer1)
+% anova(full.lmer1, full.lmer2)
+% anova(full.lmer2, full.lmer3)
+% \end{verbatim}
+% \begin{itemize}
+% 	\item<1->
+% 	\verb:anova(...,....): -- compare pairs of models
+% 	\item<2->
+% 	\verb:full.lmer0: -- a simpler model -- more limited assumptions about sources of variance
+% 	\item<3->
+% 	\verb:full.lmer1: -- a more complex model -- more predictors -- includes simpler model as a special case
+% \end{itemize}
+% \end{frame}
+% 
+% \begin{frame}{Running the \emph{anova$(,)$} comparison will deliver AIC, BIC, and likelihood comparisons for varying models}
+%      \begin{figure}     
+%       \includegraphics[scale=0.5]{RStudio-lme-anova-ML-data-subject-item-effects}
+%       \caption{Comparison of model with subject attribute predictors and model also with item effects}
+%      \end{figure}     
+% \end{frame}
+% 
+% 
+% 
+% \section{Model selection and reporting standards}
+
+
+
+\begin{frame}[fragile]{Reporting standards}{Model comparisons}
+%{Using AIC and BIC}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+	\item<1->
+	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
+	\item<2->
+	Report the AIC or BIC for the different models, or LRT for pair-wise comparisons
+	\begin{itemize}
+	\item<3->
+	Report and explain the model selection choice, based on the aims of the study and the information criteria comparisons results 
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[fragile]{Reporting standards}{Likelihood Ratio Test comparisons}
+% % burnham & anderson 2001/p.3
+% \begin{itemize}
+% 	\item<1->
+% 	Current recommendations in Psychology (Barr et al., 2013) -- to compare models of varying complexity
+% 	\item<2->
+% 	Report the indications of Likelihood Ratio Test
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{Reporting the individual predictor effects}
+% {We don't get p-values for the effects estimates -- for good reason}
+% \begin{verbatim}
+% confint(full.lmer3, method = "Wald")
+% \end{verbatim}
+\begin{itemize}
+\item<1->
+\verb:confint(full.lmer3.slopes, method = "Wald): ask for confidence intervals for effect estimates -- if do not include 0 then significant
+% \item<2->
+% \verb:method = "Wald": -- can use different methods -- ``Wald'' is faster but alternatives
+% \item<3->
+% Can ask for differing levels of confidence
+\end{itemize} 
+% \end{frame}
+% 
+% \begin{frame}[fragile]{Reporting the individual predictor effects}{We don't get p-values for the effects estimates -- for good reason}
+% \begin{itemize}
+% \item<1->
+% `for good reason' because -- see Cumming (2014) -- Psychological science should move towards reporting effects with estimates of uncertainty
+% \item<2->
+% Allows proper evaluation of evidence
+% \item<3->
+% Moves away from ``Computer says yes'' approach to data analysis
+% \end{itemize} 
+     \begin{figure}     
+      \includegraphics[scale=0.45]{ML-items-nomissing-LME-slopes}
+      \caption{LME random intercepts and slopes model, estimates of individual effects}
+     \end{figure}    
+\end{frame}
+
+\begin{frame}[fragile]{Reporting the model}
+\begin{itemize}
+\item<1->
+Summary of fixed effects -- just like in linear models -- with confidence intervals and p-values
+\item<2->
+Report random effects variance and covariance (if applicable)
+%\item<3->
+%In text, report likelihood comparisons
+\end{itemize} 
+    \begin{figure}     
+     \includegraphics[scale=0.45]{R-GLMM-word-learning-project-summary}
+     \caption{Model summary table -- word learning study -- Generalized Linear Mixed-effects model}
+    \end{figure}    
+\end{frame}
+
+%\begin{frame}[fragile]{Generalized Linear Mixed-effects model}
+%     \begin{figure}     
+%      \includegraphics[scale=0.23]{word-learning-sort-by-percent-predicted-prob-and-condition-060214-2}
+%      \caption{Model predictions of accuracy -- word learning study -- Generalized Linear Mixed-effects model}
+%     \end{figure}    
+%\end{frame}
+
+
+
+
+\end{document}
