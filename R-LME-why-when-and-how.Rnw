@@ -397,14 +397,14 @@ But it is usually incorrect to assume the multilevel structure can be represente
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{We do not model random effects directly -- we just estimate the \emph{spread} of variation in intercepts}{\emph{random intercepts} -- predicted differences (adjustments) between the overall average and the group e.g. person average}
+\begin{frame}{We do not model random effects directly -- we just estimate the \emph{spread} or variance in intercepts}{\emph{random intercepts} -- predicted differences (adjustments) between the overall average and the group e.g. person average}
      \begin{figure}     
       \includegraphics[scale=0.2]{learners-persubj-oneplot-random-intercepts-freq-RT-010314}
       \small{\caption{Learner data -- random intercepts, fixed slope in frequency effect}}
      \end{figure} 
 \end{frame}
 
-\begin{frame}{In fact, we can allow for random differences in the \emph{slopes} of the effects of theoretical interest}{\emph{random slopes} -- predicted differences (adjustments) between the overall effect and the group e.g. per-person effect}
+\begin{frame}{In fact, we can estimate the variance of random differences in the \emph{slopes} of the effects of theoretical interest}{\emph{random slopes} -- predicted differences (adjustments) between the overall effect and the group e.g. per-person effect}
 \begin{figure}     
       \includegraphics[scale=0.2]{learners-persubj-oneplot-random-intercepts-slopes-freq-RT-010314}
       \caption{Individual differences in effect of word frequency on RTs}
