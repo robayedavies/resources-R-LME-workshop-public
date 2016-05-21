@@ -146,16 +146,6 @@ AIC = -2ln(l) + 2k
 \end{equation}
 \begin{itemize}
 	\item<1->
-%	$-2ln(l)$ -2 times the log of the likelihood of the model given the data
-%	\item<2->
-%	$(l)$ -- likelihood
-%	\begin{itemize}
-%	\item<3->
-%	Is proportional to the probability of observed data conditional on some hypothesis being true
-%	\end{itemize}
-%	\item<4->
-%	So: information loss -- AIC -- how likely is the model given the data
-%	\item<4->
 	You want a more likely model -- less information loss -- closer to reality -- you want more negative or lower AIC
 	\item<2->
 	You can link models that are more likely -- closer to reality -- with models with smaller residuals
@@ -198,47 +188,114 @@ BIC = -2ln(l) + kln(N)
 	 \item<5->
 	 e.g. 10 is better than 1000, -1000 better than -10
 	\end{itemize}
-% 	\item<4->
-% 	Over and above any measure of the complexity of the model	
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Model selection and judgment}{Using AIC and BIC}
+\begin{frame}[fragile]{Reporting standards}{Using AIC and BIC}
 % burnham & anderson 2001/p.3
 \begin{itemize}
-% 	\item<1->
-% 	Compare a simpler model -- model 1, just main effects -- and a more complex -- model 2, main effects plus interactions
-% 	\item<2->
-% 	If the more complex model better approximates reality then it will be more likely given the data
-% 	\begin{itemize}
+	\item<1->
+	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
+	\item<2->
+	Report the AIC or BIC for the different models
+	\begin{itemize}
 	\item<3->
-	 AIC and BIC should move in the same direction -- usually will	 
-	 \item<4->
-	AIC will tend to allow more complex models -- may be necessary when want more accurate predictions
-	\item<5->
-	BIC will tend to favour simpler models -- may be necessary when seek models that replicate over the long run 
-%	\end{itemize}
+	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
+	\end{itemize}
 \end{itemize}
 \end{frame}
 
-% \begin{frame}[fragile]{Reporting standards}{Using AIC and BIC}
-% % burnham & anderson 2001/p.3
-% \begin{itemize}
-% 	\item<1->
-% 	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
-% 	\item<2->
-% 	Report the AIC or BIC for the different models
-% 	\begin{itemize}
-% 	\item<3->
-% 	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
-% 	\end{itemize}
-% \end{itemize}
-% \end{frame}
+\begin{frame}{Likelihood ratio test comparison}
+\begin{itemize}
+\item<1->
+The test statistic is the comparison of the likelihood of the simpler model with the more complex model
+\item<2->
+Comparison by division $2log\frac{likelihood-complex}{likelihood-simple}$
+\item<3->
+The likelihood ratio is compared to the $\chi^2$ distribution for a significance test
+\item<4->
+Assuming the null hypothesis that the simpler model is adequate
+\item<5->
+With degrees of freedom equal to the difference in the number of parameters of the models being compared  
+\end{itemize}  
+\end{frame}
 
+\begin{frame}[fragile]{Model comparisons among mixed-effects models -- use \emph{anova()} function}
+\begin{verbatim}
+anova(full.lmer0, full.lmer1)
+\end{verbatim}
+\begin{itemize}
+  \item<1->
+  \verb:anova(...,....): -- compare pairs of models
+	\item<2->
+	\verb:full.lmer0: -- a simpler model -- more limited assumptions about sources of variance
+	\item<3->
+	\verb:full.lmer1: -- a more complex model -- more predictors -- includes simpler model as a special case
+\end{itemize}
+\end{frame}
 
+\begin{frame}{Running the \emph{anova$(,)$} comparison will deliver AIC, BIC, and likelihood comparisons for varying models}
+    \begin{figure}     
+     \includegraphics[scale=0.5]{RStudio-lme-anova-ML-data-subject-item-effects}
+     \caption{Comparison of model with subject attribute predictors and model also with item effects}
+    \end{figure}     
+\end{frame}
 
-% -- add in tex from: 402-class-seven-230215.tex
-% -- outline the model sequence context
+\begin{frame}{Model comparison}
+\begin{itemize}
+\item<1->
+AIC, BIC and LRT comparisons should be consistent in their indications -- which model to prefer
+\item<2->
+Can be tricky where dealing with complex sets of predictors -- indicators may diverge
+\item<3->
+Remember that BIC may penalise complexity more heavily -- especially if conducting exploratory research
+\item<4->
+Remember that may be obliged to include all effects built-in by design -- if conducting confirmatory study
+\end{itemize} 
+    \begin{figure}     
+     \includegraphics[scale=0.35]{RStudio-lmer-anova-ML-data}
+     \caption{Comparison of empty model with model with subject attribute predictors}
+    \end{figure}    
+\end{frame}
+
+\begin{frame}[fragile]{Reporting standards in psychology}{Likelihood Ratio Test comparisons are favoured}
+% burnham & anderson 2001/p.3
+\begin{itemize}
+	\item<1->
+	Recommendations (Bates et al., 2015; glmm.wikidot) -- to compare models of varying complexity
+	\item<2->
+	Use Likelihood Ratio Test comparisons between models varying in fixed or random effects
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Reporting the individual predictor effects}{We don't get p-values for the effects estimates -- for good reason (Baayen et al., 2008) -- but see lmerTest}
+\begin{verbatim}
+confint(full.lmer3, method = "Wald")
+\end{verbatim}
+\begin{itemize}
+\item<1->
+\verb:confint(full.lmer3): -- ask for confidence intervals for effect estimates -- if do not include 0 then significant
+\item<2->
+\verb:method = "Wald": -- can use different methods -- ``Wald'' is faster but alternatives
+\item<3->
+Can ask for differing levels of confidence
+\end{itemize} 
+\end{frame}
+
+\begin{frame}[fragile]{Reporting the model}
+\begin{itemize}
+\item<1->
+Summary of fixed effects -- just like in linear models -- with confidence intervals
+\item<2->
+Report random effects variance and covariance (if applicable)
+\item<3->
+In text, report likelihood comparisons
+\end{itemize} 
+    \begin{figure}     
+     \includegraphics[scale=0.45]{R-GLMM-word-learning-project-summary}
+     \caption{Model summary table -- word learning study -- Generalized Linear Mixed-effects model}
+    \end{figure}    
+\end{frame}
 
 
 
