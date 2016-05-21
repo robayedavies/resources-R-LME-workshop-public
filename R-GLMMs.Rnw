@@ -22,7 +22,7 @@
 \graphicspath{{/Users/robdavies/Dropbox/resourcesimages/}}
 
 \title
-{PSYC 402 -- advanced statistics -- Class Seven}
+{Generalized Linear Mixed-effects models}
 
 \author
 {Rob Davies}
@@ -57,18 +57,7 @@
 
 
 
-\begin{frame}{\emph{Targets for Class Six}}{Ideas and skills -- foundations for later work}
-  \begin{enumerate}
-  \item
-  Understand the use of \emph{Information Criteria} to evaluate models
-  \item
-  Practise running linear mixed-effects models with varying fixed or random effects structures
-  \item
-  Practise evaluating models to select the most useful
-  \end{enumerate}  
-\end{frame}
-
-\begin{frame}{\emph{Targets for Class Seven}}{Ideas and skills -- foundations for later work}
+\begin{frame}{Aims for the class}
   \begin{enumerate}
   \item
   Understand the reasons for using Generalized Linear Mixed-effects models (GLMMs) to analyze discrete outcome variables
@@ -87,7 +76,7 @@
 
 
 
-\begin{frame}{Understand the reasons for using Generalized Linear Mixed-effects models (GLMMs) to analyze discrete outcome variables}{Discrete outcome variables are very common}
+\begin{frame}{Discrete outcome variables are very common}{Understand the reasons for using Generalized Linear Mixed-effects models (GLMMs) to analyze discrete outcome variables}
   \begin{itemize}
   \item<1->
   We often need to analyze outcomes that are discrete or categorical
@@ -111,8 +100,8 @@
   The accuracy of responses (correct vs. incorrect) is counted e.g. as the number of correct responses (or errors) per subject, per condition
   \item<3->
   The raw number of correct or incorrect responses, or the percentage, or the proportion of responses that are correct or incorrect out of the total number of responses is analyzed as the outcome variable in ANOVA or regression
-%   \item<4->
-%   See the same approach if the outcome is group membership (e.g. impaired vs. healthy) or visual field (e.g. left vs. right) etc.
+  \item<4->
+  See the same approach if the outcome is group membership (e.g. impaired vs. healthy) or visual field (e.g. left vs. right) etc.
   \end{itemize}
   \end{itemize}    
 \end{frame}
@@ -216,103 +205,7 @@ ln\frac{p}{1-p} = logitp = \beta_0 + \beta_1X_1 \dots
 		\item<2->
      log odds range from negative to positive infinity (logit of 0 corresponds to proportion of .5)
 	\end{itemize}
-%    \column{.4\textwidth}
-%      \begin{figure}     
-%       \includegraphics[scale=0.25]{jaeger-2008-fig-2-logit-probability-space}
-%       \caption{\footnotesize{Jaeger (2008) small changes on the x-axis around p = .5 lead to larger differences in probabilities}} 
-%       % compared to the same change on the x-axis closer to 0 or 1
-%      \end{figure} 
-% \end{columns}     
 \end{frame}
-
-% -- not sure that understand the following correctly but try to work it out here:
-% -- "Logit models capture the fact that differences in proba- bilities around p = .5 matter less than the same changes close to 0 or 1."
-
-% -- see following for attempt to work it out:-
-
-% -- jaeger 2008 p 3 -- Also, as can be see in Fig. 1, differences close to 0.5 will matter less than differences closer to 0 or 1. -- this is because variance is dependent on p the probability of an outcome of one type, and that variance will be at maximum at p = .5
-
-% -- jaeger 2008 p4 -- Logit models capture the fact that differences in proba- bilities around p = .5 matter less than the same changes close to 0 or 1. This is illustrated in Fig. 2, where the left panel shows a hypothetical linear effect of a predictor x in logit space (y = 􏰆3 + 0.2x), and the right panel shows the same effect in probability space. As can be seen in the right panel, small changes on the x-axis around p = .5 (i.e. x=15 since 0=􏰆3+0.2*15=logit(0.5)) lead to large decreases or increases in probabilities compared to the same change on the x-axis closer to 0 or 1.
-
-% -- what we can understand, then, is that:
-% 1. small changes in x where p = .5 lead to large changes in probability -- the slope is steepest (figure 2, right) there
-% 2. these changes will be less important -- the variance is greatest (figure 1) there
-
-% -- 040316 -- maybe the point is that probability distance is stretched out in the middle but compact at the ends, like the distortion of space by
-% gravity
-
-\begin{frame}{What does it tell us that the predicted probability of a categorical outcome takes a sigmoid curve shape?}
-%{What does the curve tell us?}
-\begin{itemize}
-\item<1->
-Changes in predictors are associated with larger differences in probability when $p \sim .5$ where slope is steepest (Figure 2, right)
-\item<2->
-Variance in sample proportions are also greatest around p = .5 so see bigger differences there but less importance?
-\end{itemize}
- \begin{columns}[T]
-  \column{.5\textwidth}  
-     \begin{figure}     
-      \includegraphics[scale=0.15]{jaeger-2008-fig-1-variance-prop-mean}
-      \caption{\footnotesize{Jaeger (2008; Fig.1) variance of sample proportion dependent on probability response is correct}}
-      % -- greatest at $p=.5$}
-     \end{figure}
-% -- jaeger 2008 p3 --  the variance of the sample proportions will be highest for p = .5 (the product of n numbers x that add up to 1 is highest if x1=. . .=xn) and will decrease symmetrically as we approach 0 or 1. This is illustrated in Fig. 1. Note that the shape of the curve and the location of its maximum are determined by p alone.
-% -- Also, as can be see in Fig. 1, differences close to 0.5 will matter less than differences closer to 0 or 1. 
-   \column{.5\textwidth}
-     \begin{figure}     
-      \includegraphics[scale=0.25]{jaeger-2008-fig-2-logit-probability-space}
-      \caption{\footnotesize{Jaeger (2008; Fig.2) small changes on the x-axis around $p = .5$ lead to large decreases or increases in probabilities compared to $p \sim 0 or 1$}}
-      % the same change on the x-axis closer to 0 or 1}}
-     \end{figure}
-% -- jaeger 2008 p4 -- 
-% -- what if we transformed proportions into a space that is not bounded by 0 and 1 and that captures the fact that, in real binomially distributed data, a change in proportions around 0.5 usually corresponds to a smaller change in the predictors than the same change in proportions close to 0 or 1 (i.e. the relation between the predictors and propor- tions is nonlinear; cf. Agresti, 2002: 122)? Consider odds.
-% -- if we transform proportions to odds then we get an outcome that ranges from 0 to positive infinity, o = \frac{p}{1-p}
-% -- differences in odds are usually described multiplicatively eg one set of odds is x times greater or smaller than another set of odds
-% -- we can describe the odds of an outcome as a product of coefficients raised to the power of the respective predictive values \frac{p}{1-p} = \beta_0*\beta_1^{X_1} ...
-% -- by taking the natural log of odds, we can turn the model back into a linear combination ln\frac{p}{1-p} = ln\beta_0 + ln\beta_1^{X_1} ...
-% -- because ln\beta_0 + ln\beta_1 + ... are constants, we can substitute \beta_0 + \beta_1 for them so ln\frac{p}{1-p} = logitp = \beta_0 + \beta_1X_1 ...
-% -- the logit is centred on 0 ie logitp = -logit(1-p) corresponding to a probability of .5
-% -- the logit ranges from negative to positive infinity
-% -- the logit maps points in probability space into points in logit space -- in probability space the linear relationship that we see in logit space is gone
-% -- we can understand that this will be because p = \frac{e^{x'\beta}}{1 + e^{x'\beta}} = \frac{1}{1 + e^{-x'\beta}} ie probabilities are calculated as equal to the natural log to the power of the effects divided by 1 plus the same
-% -- can run \frac{1}{1 + e^{-x'\beta}} with some fake numbers for {-x'\beta} and see indeed that differences in the resulting probabilities are larger if p = .5 compared to p nearer to extremes even if differences in x are the same
-% 1/(1+exp(-0.25))
-% 1/(1+exp(0.25))
-% 
-% 1/(1+exp(-.25)) - 1/(1+exp(.25))
-% 
-% 1/(1+exp(-1))
-% 1/(1+exp(-.5))
-% 
-% 1/(1+exp(-1)) - 1/(1+exp(-.5))
-% 
-% 1/(1+exp(-1.5))
-% 1/(1+exp(-1))
-% 
-% 1/(1+exp(-1.5)) - 1/(1+exp(-1))
-% -- jaeger 2008 p4 -- 
-% -- Logit models capture the fact that differences in proba- bilities around p = .5 matter less than the same changes close to 0 or 1. This is illustrated in Fig. 2, where the left panel shows a hypothetical linear effect of a predictor x in logit space (y = 􏰆3 + 0.2x), and the right panel shows the same effect in probability space. As can be seen in the right panel, small changes on the x-axis around p = .5 (i.e. x=15 since 0=􏰆3+0.2*15=logit(0.5)) lead to large decreases or increases in probabilities compared to the same change on the x-axis closer to 0 or 1.  
-% -- differences in probabilities around p = .5 matter less than the same changes close to 0 or 1: why?
-% -- when we look at the probability curve we can see that for constant change in x the probability moves a lot around p = .5 but less towards the extremes, 0 or 1 
-% -- how can that mean that differences in probabilities around p = .5 matter less?
-% -- we could say that differences in probabilities around p = .5 are associated with smaller changes in X
-% -- we also know that variance in probabilities are greatest around p = .5 so we might see bigger differences in probability but those differences are less meaningful -- they also matter less in that sense
-% -- baguley p 678 -- if consider the sigmoidal curve (y = probability) produced by the inverse of the logistic function, for values close to p = .5 the slope of the predictor expressed on a probability scale is around .25 times the coefficient on the logit scale
-% -- we can see this if we compare the slopes of the jaeger figure 2 logit-scale vs. probability-scale depictions of the effect of x on categorical outcome y 
-% -- the slope on the probability scale is clearly steeper than the slope on the logit scale
-\end{columns}     
-\end{frame}
-
-% -- what makes it difficult for me is the intuition that differences in probability around p = .5 matter more than the same changes closer to 0 or 1
-% -- the sigmoid curve of the probability-scale graph of the x effect means that bigger changes in x are required to get the same differences in probabilities as you approach the extremes of probability, 0 or 1
-% -- as jeager says "...in real binomially distributed data, a change in proportions around .5 usually corresponds to a smaller change in the predictors than the same change in proportions closer to 0 or 1 (i.e. the relation between the predictors and proportions is nonlinear)..."
-% -- changes in probability considered alone cannot matter more or less depending on where in the 0-1 probability range you are
-% -- what we can have is bigger changes in probability associated with smaller changes in the predictor around p = .5 compared to the extremes of the 0-1 probability range
-% -- this will mean that 
-
-% -- see also jaeger 2008 p8 -- One reason why the arcsine transformation is unreli- able for such data becomes apparent once we compare the plots of logit and arcsine transformed proportions. Fig. 4 shows the slope (1st derivative) and curvature (2nd derivative) of the two transformations. Both trans- formations have a saddle point at p = .5, but for all p 61⁄4 .5 the slope of the logit is always higher than the slope of the arcsine-square-root. The absolute curvature (the change in the slope) is also larger. In other words, as one moves away from p = .5, a change in probability p1 to p2 corresponds to more of a change in log-odds than to a change in arcsine transformed probabilities. means that, compared to the logit, the arcsine transfor- mation underestimates changes in probability more the closer they are to 0 or 1.
-
-% -- so teach what I understand -- that changes in x associated with bigger changes in probability around p = .5, which could mean effects are bigger, but variance also larger there so maybe relatively smaller compared to variance
 
 \begin{frame}{To illustrate GLMMs we use the word learning data set}{Padraic Monaghan, me and colleagues examined the accuracy of responses in a word learning study: noun-verb-learning-study.csv}
 % In our study, we directly compared learning of noun-object pairings, verb- motion pairings, and learning of both noun and verb pairings simultaneously, using an identical cross-situational learning task and environment in each case. We predicted that, consistent with previous studies of noun learning, word-object mappings would be learned from cross-situational statistics even when the utterances were complex and the observed dynamic scenes more complex than stationary figures. We also predicted that it would be possible to learn verbs from the same cross-situational statistics even though the names for the objects remained unknown, and that when nouns and verbs could be learned from the same utterance then cross-situational statistics would be sufficiently powerful to demonstrate learning for both these grammatical categories.
@@ -464,43 +357,6 @@ anova(all.merged.glmm0, all.merged.glmm1, all.merged.glmm2, all.merged.glmm3)
   But some authors (Bates et al., 2015; arXiv) argue we should test for the utility of adding model complexity
 \end{itemize}
 \end{frame}
-
-% \begin{frame}{Random slopes of what?}{If a fixed effect is manipulated within-units then random effects of those units on intercepts and on the slopes of the within-units fixed effect should be examined}
-% % but if it is manipulated between units then only random effects of those units on intercepts may be required}
-% \begin{itemize}	
-% 	\item<1->
-% 	It makes sense to allow for variation in the effects of variables that are manipulated \emph{within-subjects}
-% 	\begin{itemize}	
-% 	\item<2->
-% 	If everyone sees the same words and you are testing the effect of word attributes then the effects of those variables are \emph{within-subjects}
-% % 	\item<3->
-% % 	Consider: you have 104 observations for a person, \emph{within} the variation in RT for that person the relative frequency of a word may or may not be associated with change in the RTs of their responses
-% 	\end{itemize}
-% 	\item<3->
-% 	What about effects that may vary \emph{within-items}?
-% %	\begin{itemize}	
-% %	\item<5->
-% %	Evidently, it would not make sense to consider the random effect of items on the slope of the effect of frequency -- how could we ask if words vary in their sensitivity to a frequency effect?
-% %	\item<6->
-% %	But consider: if you were testing the response of participants to words presented under different priming conditions -- there you might sensibly examine the random effect of items on the slope of the priming effect
-% %	\end{itemize}
-% 	\end{itemize}
-% \end{frame}
-
-% -- random slopes of what?
-% -- barr et al 2013 p275 --
-% So the first question to ask oneself when trying to specify a maximal LMEM is: which factors are within-unit, and which are between? If a factor is between-unit, then a random intercept is usually sufficient. If a factor is within-unit and there are multiple observations per treatment level per unit, then you need a by-unit random slope for that factor. The only exception to this rule is when you only have a single observation for every treatment level of every unit; in this case, the random slope variance would be completely confounded with trial-level error. It follows that a model with a random slope would be unidentifiable, and so a random intercept would be sufficient to meet the conditional independence assumption.
-% -- so eg SOA is between subjects because we have multiple different subjects in each level of the factor
-% -- while frequency is within subjects because we have multiple observations per treatment level per subject -- we can think of multiple words at each frequency level
-% -- we could have one observation per stimulus per level per subject -- so a high frequency word for person1, a low frequency word for person2 -- we cannot then distinguish differences between person from differences due to frequency
-% -- barr et al 2013 p260 --
-% At this point, we might wish to go further and consider other models. For instance, we have considered a by-sub- ject random slope; for consistency, why not also consider a model with a by-item random slope, I1i? A little reflection reveals that a by-item random slope does not make sense for this design. Words are nested within word types—no word can be both type A and type B—so it is not sensible to ask whether words vary in their sensitivity to word type. No sample from this experiment could possibly give us the information needed to estimate random slope variance and random slope/intercept covariance parameters for such a model. A model like this is unidentifiable for the data it is applied to: there are (infinitely) many different values we could choose for its parameters which would describe the data equally well.4 Experiments with a within-item manipulation, such as a priming experiment in which target words are held constant across conditions but the prime word is varied, would call for by-item random slopes, but not the current experiment.
-% The above point also extends to designs where one independent variable is manipulated within- and another variable between- subjects (respectively items). In case of between-subject manipulations, the levels of the subject variable are nested within the levels of the experimental treatment variable (i.e. each subject belongs to one and only one of the experimental treatment groups), meaning that subject and treatment cannot interact—a model with a by-subject random slope term would be unidentifiable. In general, within-unit treatments require both the by-unit intercepts and slopes in the random effects specification, whereas between-unit treatments require only the by-unit random intercepts.
-% ...
-% to form a cluster in the sample, it is necessary to have more than one observation for a given unit; otherwise, the clustering effect cannot be distin- guished from residual error.5 If we only elicit one observa- tion per subject/item combination, we are unable to estimate this source of variability, and the model containing this random effect becomes unidentifiable. Had we used a design with repeated exposures to the same items for a gi- ven subject, the same model would be identifiable, and in fact we would need to include that term to avoid violating the conditional independence of our observations given sub- ject and item effects.
-% -- so in short:
-% -- a factor is within-unit if there are multiple observations per treatment level per unit -- whether subjects or items
-% -- an example of a within-items manipulation is priming where you might see the same items both under primed and nonprimed conditions
 
 \begin{frame}[fragile]{Examine the utility of random effects by comparing models with the same fixed effects but varying random effects}{I am just going to assume we need both random effects of subjects and of items on intercepts so I focus on \emph{random slopes}}
 \footnotesize{\begin{verbatim}
