@@ -42,11 +42,6 @@
   \titlepage
 \end{frame}
 
-%\begin{frame}[allowframebreaks]
-%  \frametitle<presentation>{Outline}
-%  \tableofcontents
-%\end{frame}
-
 
 
 \section{Introduction}
@@ -56,28 +51,16 @@
 \subsection{Aims for the class}
 
 
-
-\begin{frame}{\emph{Targets for Class Five}}{Ideas and skills -- foundations for later work}
-  \begin{enumerate}
-  \item
-  Understand the motivation for \emph{linear mixed-effects models} -- the requirements of handling multilevel structured data
-  \item
-  Recognize alternative methods for analyzing multilevel structured data
-  \item
-  Practise running linear mixed-effects models in R
-%   \item
-%   Evaluating models -- $R^2$ or information criteria
-  \end{enumerate}  
-\end{frame}
-
 \begin{frame}{\emph{Targets for Class Six}}{Ideas and skills -- foundations for later work}
   \begin{enumerate}
   \item
-  Understand the use of \emph{Information Criteria} to evaluate models
+  Understand the use of \emph{Information Criteria} and \emph{Likelihood Ratio Tests} for evaluating models
   \item
   Practise running linear mixed-effects models with varying fixed or random effects structures
   \item
-  Practise evaluating models to select the most useful
+  Practise evaluating models
+  \itm
+  Practise reporting models
   \end{enumerate}  
 \end{frame}
 
