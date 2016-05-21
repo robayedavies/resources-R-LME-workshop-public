@@ -535,46 +535,6 @@ summary(full.lmer1)
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Model comparisons among mixed-effects models -- use \emph{anova()} function}
-\begin{verbatim}
-anova(full.lmer0, full.lmer1)
-\end{verbatim}
-\begin{itemize}
-	\item<1->
-	\verb:anova(...,....): -- compare pairs of models
-	\item<2->
-	\verb:full.lmer0: -- a simpler model -- more limited assumptions about sources of variance
-	\item<3->
-	\verb:full.lmer1: -- a more complex model -- more predictors -- includes simpler model as a special case
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Running the \emph{anova$(,)$} comparison will deliver AIC, BIC, and likelihood comparisons for varying models}
-    \begin{figure}     
-     \includegraphics[scale=0.5]{RStudio-lme-anova-ML-data-subject-item-effects}
-     \caption{Comparison of model with subject attribute predictors and model also with item effects}
-    \end{figure}     
-\end{frame}
-
-\begin{frame}[fragile]{Model selection and judgment}{Using Information Criteria statistics}
-% burnham & anderson 2001/p.3
-\begin{itemize}
-	\item<1->
-	Compare a simpler model, example: model 0, just random effects on intercepts; model 1, just subject main effects; model 2, subject and item main effects
-	\item<2->
-	If the more complex model better approximates reality then it will be more likely given the data
-	\begin{itemize}
-	\item<3->
-	 AIC will be closer to negative infinity
-   % : $-2ln(l)$ will be larger	 
-	 \item<4->
-	 e.g. 10 is better than 1000, -1000 better than -10
-	\end{itemize}
-	\item<4->
-	Over and above any measure of the complexity of the model	
-\end{itemize}
-\end{frame}
-
 
 
 
