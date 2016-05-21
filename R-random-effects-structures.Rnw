@@ -22,7 +22,7 @@
 \graphicspath{{/Users/robdavies/Dropbox/resourcesimages/}}
 
 \title
-{PSYC 402 -- advanced statistics -- Class Six}
+{Specifying models -- fixed and random effects}
 
 \author
 {Rob Davies}
