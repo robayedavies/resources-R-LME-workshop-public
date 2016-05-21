@@ -51,7 +51,7 @@
 \subsection{Aims for the class}
 
 
-\begin{frame}{\emph{Targets for Class Six}}{Ideas and skills -- foundations for later work}
+\begin{frame}{Aims for the class}
   \begin{enumerate}
   \item
   Understand the use of \emph{Information Criteria} and \emph{Likelihood Ratio Tests} for evaluating models
@@ -68,85 +68,7 @@
 \subsection{Evaluating models}
 
 
-\begin{frame}{Model evaluation}{What is the logic of the $R^2$ and F-tests in regression? Recall: Imagine trying to predict values of Y when you knew nothing about X -- your best prediction for Y is then the mean value for Y, that is, $\bar{Y}$, and the error of prediction would be the spread of Y values about the mean -- \alert{the intercept}}
-\begin{equation}
-s_Y^2 = \frac{\sum(Y-\bar{Y})^2}{N-1} = \frac{SS_Y}{df}
-\end{equation}
-\end{frame}
-
-\begin{frame}{Next we can think about how we could predict values of Y when we have values of X}{Recall: Our best prediction for Y is provided by the regression $\hat{Y} = \beta_0 + \beta_X$ and the error of prediction is the spread of Y values about the predicted outcome values. We call predicted outcomes $\hat{Y}$}
-\begin{equation}
-s_{Y.X}^2 = \frac{\sum(Y-\hat{Y})^2}{N-2} = \frac{SS_{residual}}{df}
-\end{equation}
-\begin{itemize}
-\item<1->
-$SS_{residuals}$ is \emph{the sum of squares of residuals}: the sum of squared deviations from the predicted outcomes $\hat{Y}$ 
-\item<2->
-It represents the variability that remains after we use X to predict Y
-%\item<3->
-%$s_{Y.X}$ is known as the \emph{standard error of the estimate}
-%\item<4->
-%$s_{Y.X}^2$ is the \emph{residual error variance}
-%\item<5->
-%We have $n-2$ degrees of freedom (df) because we used two to estimate the slope and the intercept in the regression
-\end{itemize}
-\end{frame}
-
-\begin{frame}{How good is the model?}{$r^2$ gives us the proportion of variability in Y that can be explained by the model i.e. the relationship between X and Y}
-\begin{equation}
-r^2 = \frac{SS_Y - SS_{residual}}{SS_Y}
-\end{equation}
-\begin{itemize}
-\item<1->
-Variation in Y -- sums of squares of Y $SS_Y$ equals:
-\item<2->
-That part of the variability in Y due to the relationship between X and Y
-\item<3->
-Plus $SS_{residual} = $ the part of variance in Y \alert{not} due to the relationship between X and Y
-\end{itemize}
-\end{frame}
-
-% Field/301
-% The improvement in prediction resulting from using the regression model rather than the mean is calculated by calculating the difference between SS_T and SS_R i.e. between total variance and residual variance.
-% This difference shows us the the reduction in the inaccuracy of the model resulting from fitting the regression model to the data.
-% The total sums of squares uses the differences between the observed data and the mean value for Y.
-% The residual SS uses the difference between the observed and the predicted Y.
-% The model sums of squares uses the differences between the mean Y and the predicted Y: i.e. $\sum(\hat{Y}-\bar{Y})^2$
-
-% $r^2$ will account for a high percentage of total outcome variance if the model is useful -- If a lot of variation in the outcome is predicted by differences due to X then residuals will be small
-
-\begin{frame}{F is the ratio comparing systematic variance (model) to error variance -- as in ANOVA}
-% -- i.e. we compare an estimate of variance based on the model (differences in outcome due to differences between conditions i.e. levels of X) with an estimate of error based on the difference between observed and predicted outcome values
-\begin{equation}
-F = \frac{MS_{regression}}{MS_{residual}}
-\end{equation}
-\begin{itemize}
-\item<1->
-$MS_{regression}$ estimates the difference between (1.) having a model or (2.) knowing just the mean outcome to predict outcome variation
-\item<2->
-$MS_{residual}$ estimates the difference between model predictions of the outcome and observed outcome values
-\item<3->
-F compares the two estimates -- if the model is useful then the difference it makes will be large and residuals will be small 
-% -- so F will be large
-\end{itemize}
-\end{frame}
-
-
-
-% -- add in tex from: 402-advanced-statistics-class-four-030215.tex
-% -- outline the model comparison approach
-
-\section{Linear models -- model comparison approach}
-
-
-
-% \begin{frame}[fragile]{Linear models -- \alert{Model comparison approach}}{We focus on building a series of models up to the most complex model supported by the data}
-%      \begin{figure}     
-%       \includegraphics[scale=0.16]{scatterplots-ML-RT-by-main-effects}
-%      \end{figure}
-% \end{frame}
-
-\begin{frame}[fragile]{Linear models and linear mixed-effects models -- \alert{Model comparison approach}}{We focus on building a series of models from the simplest to the most complex model supported by the data}
+\begin{frame}[fragile]{Linear mixed-effects models -- \alert{Model comparison approach}}{We focus on building a series of models from the simplest to the most complex model supported by the data}
 \begin{itemize}
   \item<1->
 	A minimal model -- data observed can be predicted only by the average of observations -- the intercept
