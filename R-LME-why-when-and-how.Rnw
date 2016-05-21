@@ -437,10 +437,10 @@ But it is usually incorrect to assume the multilevel structure can be represente
 \begin{frame}[fragile]{We focus on building a series of models up to the most complex model supported by the data}
 \begin{itemize}
  \item<1->
-	A minimal model of the data might assume that the data we observe can be predicted only by the average value of observations
+	A minimal (empty) model of the data might assume that the data we observe can be predicted only by the average value of observations -- overall average -- intercept 
 	\begin{itemize}
 	\item<2->
-	The overall average -- intercept -- and random effects of grouping variables like subjects or stimulus items
+	And random effects of grouping variables like subjects or stimulus items on the average outcome
 	\end{itemize}
 	\item<3->
 	The question is then whether our capacity to predict observations is improved by adding other terms
@@ -462,7 +462,7 @@ But it is usually incorrect to assume the multilevel structure can be represente
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{R code for running a linear mixed-effects model is similar to the code for running a linear model}
+\begin{frame}[fragile]{R code for running a linear mixed-effects model is similar to the code for running a linear model}{Start with an empty model specifying just the fixed effect of the intercept (overall average outcome) and the random effects of subjects and of items on intercepts (random differences in average outcomes)}
 \begin{verbatim}
 full.lmer0 <- lmer(logrt ~
                      
@@ -500,71 +500,7 @@ data = subjects.behaviour.items.nomissing, REML = F)
 \end{itemize}
 \end{frame}
 
-% \begin{frame}[fragile]{Estimation methods}{An intuitive account of estimation in mixed-effects models}
-% \begin{itemize}
-% 	\item<1->
-% 	If we knew the random effects, we could find the fixed effects estimates by minimising differences -- like linear modelling
-% 	\item<2->
-% 	If we knew the fixed effects -- the regression coefficients -- we could work out the residuals and the random effects
-% 	\item<3->
-% 	At the start, we know neither, but we can move between partial estimation of fixed and random effect in an \emph{iterative approach}
-% 	\begin{itemize}
-% 	\item<4->
-% 	Using provisional values for the fixed effects to estimate the random effects
-% 	\item<5->
-% 	Using provisional values for the random effects to estimate the fixed effects again
-% 	\item<6->
-% 	To \emph{converge} on the maximum likelihood estimates of effects -- when the estimates stop changing
-% 	\end{itemize}	
-% \end{itemize}
-% \end{frame}
-% 
-% \begin{frame}[fragile]{Restricted maximum likelihood ($REML=TRUE$) and maximum likelihood ($REML=FALSE$) methods}
-% \begin{itemize}
-% 	\item<1->
-% 	Restricted maximum likelihood ($REML=TRUE$)
-% 	\begin{itemize}
-% 	\item<2->
-% 	REML estimates the variance components while taking into account the loss of degrees of freedom resulting from the estimation of the fixed effects
-% 	\item<3->
-% 	\emph{REML estimates vary if the fixed effects vary}
-% 	\item<4->
-% 	Therefore not recommended to compare the \emph{likelihood} of models varying in fixed effects fitted using REML (Pinheiro \& Bates, 2000)
-% 	% pinheiro & bates 2000 / p.76
-% 	\end{itemize}	
-% 	\item<5->
-% 	REML method recommended for comparing the likelihood of models with \emph{the same fixed effects} but \emph{different random effects}
-% 	% snijders & boskers p.60
-% 	\begin{itemize}
-% 	\item<6->	
-% 	REML more accurate for random effects estimation
-% 	% snijders & boskers p.89
-% 	\end{itemize}
-% \end{itemize}
-% \end{frame}
-% 
-% \begin{frame}[fragile]{Model comparisons among mixed-effects models -- maximum likelihood methods}
-% \begin{verbatim}
-% full.lmer0 <- lmer(logrt ~
-%                      
-% (1|subjectID) + (1|item_name),
-%                    
-% data = subjects.behaviour.items.nomissing, REML = F)
-% \end{verbatim}
-% \begin{itemize}
-% 	\item<1->
-% 	Maximum likelihood ($REML=FALSE$)
-% 	\begin{itemize}
-% 	\item<2->
-% 	ML estimation methods can be used to fit models with varying fixed effects but the same random effects
-% 	\item<3->
-% 	ML estimation: a good place to start when building-up model complexity -- adding parameters to an empty model
-% 	% P & B 2000 advise that approach is anti conservative but barr et al 2013 argue not so
-% 	\end{itemize}
-% \end{itemize}
-% \end{frame}
-
-\begin{frame}[fragile]{LMEs -- build-up the \emph{fixed} effects while holding the \emph{random} effects constant}{To empty model, for the ML study analysis, add subject then item attribute predictors}
+\begin{frame}[fragile]{LMEs -- build-up the \emph{fixed} effects while holding the \emph{random} effects constant}{To empty model, for the ML study analysis, add subject attribute variables as predictors}
 \footnotesize{\begin{verbatim}
 full.lmer1 <- lmer(logrt ~
                   
@@ -586,30 +522,6 @@ summary(full.lmer1)
 \end{itemize}
 \end{frame}
 
-% \begin{frame}[fragile]{Compare the empty model lmer0 to the model with just subject effects lmer1 to the model also with item effects lmer2 \dots}
-% \footnotesize{\begin{verbatim}
-% full.lmer2 <- lmer(logrt ~
-%                      
-% zAge + zTOWRE_wordacc + zTOWRE_nonwordacc +
-%                                 
-% item_type + zLength + zOrtho_N +
-%                      
-% (1|subjectID) + (1|item_name),
-%                                         
-% data = ML.all.correct, REML = F)
-%                    
-% # getting model effects summary
-%                    
-% summary(full.lmer2)
-% \end{verbatim}}
-% \begin{itemize}
-% 	\item<1->
-% 	Notice that the item effects are added
-% 	\item<2->
-%  	Everything else stays the same
-% \end{itemize}
-% \end{frame}
-
 \begin{frame}{How do we know if increasing \emph{model complexity} by adding predictors actually helps us to account for variation in outcome values?}{Simplicity and parsimony}
 \begin{itemize}
  \item<1->
@@ -621,74 +533,6 @@ summary(full.lmer1)
 	Effects may be \emph{unintuitive} and hard to explain \emph{and} not reproduced in future samples
 	\end{itemize}			
 \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Akaike Information Criteria: \emph{AIC}}{Akaike showed you could estimate information loss in terms of the likelihood of the model given the data}
-% burnham & anderson 2001/p.3
-% baguleypp. 402 --
-\begin{equation}
-AIC = -2ln(l) + 2k
-\end{equation}
-\begin{itemize}
-	\item<1->
-	$-2ln(l)$ -2 times the log of the likelihood of the model given the data
-	\item<2->
-	$(l)$ -- likelihood
-	\begin{itemize}
-	\item<3->
-	Is proportional to the probability of observed data conditional on some hypothesis being true
-	\end{itemize}
-	\item<4->
-	$k$ -- is the number of parameters in the model
-	\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{Bayesian Information Criteria: \emph{BIC}}{Schwartz proposed an alternative estimate}
-% burnham & anderson 2001/p.3
-% baguleypp. 402 --
-\begin{equation}
-BIC = -2ln(l) + kln(N)
-\end{equation}
-\begin{itemize}
-	\item<1->
-	$-2ln(l)$ -- -2 times the log of the likelihood of the model given the data
-	\item<2->
-	$+ kln(N)$ -- is the number of parameters in the model times the log of the sample size
-	\item<3->
-	Crudely, the penalty for greater complexity is heavier in BIC
-\end{itemize}
-\end{frame}
-
-\begin{frame}{Likelihood ratio test comparison}
-\begin{itemize}
-\item<1->
-The test statistic is the comparison of the likelihood of the simpler model with the more complex model
-\item<2->
-Comparison by division $2log\frac{likelihood-complex}{likelihood-simple}$
-\item<3->
-The likelihood ratio is compared to the $\chi^2$ distribution for a significance test
-\item<4->
-Assuming the null hypothesis that the simpler model is adequate
-\item<5->
-With degrees of freedom equal to the difference in the number of parameters of the models being compared  
-\end{itemize}  
-\end{frame}
-
-\begin{frame}{Model comparison}
-\begin{itemize}
-\item<1->
-AIC, BIC and LRT comparisons should be consistent in their indications -- which model to prefer
-\item<2->
-Can be tricky where dealing with complex sets of predictors -- indicators may diverge
-\item<3->
-Remember that BIC may penalise complexity more heavily -- especially if conducting exploratory research
-\item<4->
-Remember that may be obliged to include all effects built-in by design -- if conducting confirmatory study
-\end{itemize} 
-    \begin{figure}     
-     \includegraphics[scale=0.35]{RStudio-lmer-anova-ML-data}
-     \caption{Comparison of empty model with model with subject attribute predictors}
-    \end{figure}    
 \end{frame}
 
 \begin{frame}[fragile]{Model comparisons among mixed-effects models -- use \emph{anova()} function}
@@ -712,12 +556,6 @@ anova(full.lmer0, full.lmer1)
     \end{figure}     
 \end{frame}
 
-
-
-\section{Model selection and reporting standards}
-
-
-
 \begin{frame}[fragile]{Model selection and judgment}{Using Information Criteria statistics}
 % burnham & anderson 2001/p.3
 \begin{itemize}
@@ -736,76 +574,6 @@ anova(full.lmer0, full.lmer1)
 	Over and above any measure of the complexity of the model	
 \end{itemize}
 \end{frame}
-
-\begin{frame}[fragile]{Model selection and judgment}{Using AIC and BIC}
-\begin{itemize}
-	\item<1->
-	Compare a simpler model: model 1, just main effects; model 2, main effects plus interactions
-	\item<2->
-	If the more complex model better approximates reality then it will be more likely given the data
-	\begin{itemize}
-	\item<3->
-	AIC and BIC should move in the same direction -- usually will	 
-	\item<4->
-	AIC will tend to allow more complex models -- may be necessary when want more accurate predictions
-	\item<5->
-	BIC will tend to favour simpler models -- may be necessary when seek models that replicate over the long run 
-	\end{itemize}
-\end{itemize}
-\end{frame}
-
-% \begin{frame}[fragile]{Reporting standards}{Using AIC and BIC}
-% % burnham & anderson 2001/p.3
-% \begin{itemize}
-% 	\item<1->
-% 	Report briefly the model comparisons: ``Compared a simpler model: model 1, just main effects; model 2, main effects plus interactions''
-% 	\item<2->
-% 	Report the AIC or BIC for the different models
-% 	\begin{itemize}
-% 	\item<3->
-% 	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
-% 	\end{itemize}
-% \end{itemize}
-% \end{frame}
-
-\begin{frame}[fragile]{Reporting standards}{Likelihood Ratio Test comparisons}
-% burnham & anderson 2001/p.3
-\begin{itemize}
-	\item<1->
-	Recommendations (Bates et al., 2015; glmm.wikidot) -- to compare models of varying complexity
-	\item<2->
-	Use Likelihood Ratio Test
-\end{itemize}
-\end{frame}
-
-% \begin{frame}[fragile]{Reporting the individual predictor effects}{We don't get p-values for the effects estimates -- for good reason}
-% \begin{verbatim}
-% confint(full.lmer3, method = "Wald")
-% \end{verbatim}
-% \begin{itemize}
-% \item<1->
-% \verb:confint(full.lmer3): -- ask for confidence intervals for effect estimates -- if do not include 0 then significant
-% \item<2->
-% \verb:method = "Wald": -- can use different methods -- ``Wald'' is faster but alternatives
-% \item<3->
-% Can ask for differing levels of confidence
-% \end{itemize} 
-% \end{frame}
-% 
-% \begin{frame}[fragile]{Reporting the model}
-% \begin{itemize}
-% \item<1->
-% Summary of fixed effects -- just like in linear models -- with confidence intervals
-% \item<2->
-% Report random effects variance and covariance (if applicable)
-% \item<3->
-% In text, report likelihood comparisons
-% \end{itemize} 
-%     \begin{figure}     
-%      \includegraphics[scale=0.45]{R-GLMM-word-learning-project-summary}
-%      \caption{Model summary table -- word learning study -- Generalized Linear Mixed-effects model}
-%     \end{figure}    
-% \end{frame}
 
 
 
