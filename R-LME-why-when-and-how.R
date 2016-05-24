@@ -353,13 +353,23 @@ AIC(ML.all.correct.lmer.0, ML.all.correct.lmer.1, ML.all.correct.lmer.2)
 
 anova(ML.all.correct.lmer.0, ML.all.correct.lmer.1)    	
 anova(ML.all.correct.lmer.1, ML.all.correct.lmer.2)			
-anova(ML.all.correct.lmer.2, ML.all.correct.lmer.3)	
 
 
 # get confidence intervals for effects estimates for last model
 
 summary(ML.all.correct.lmer.2)
 confint(ML.all.correct.lmer.2, method = "Wald")  
+
+
+# get amrginal and conditional GLMM R-sq (Barton, 2016; Johnson, 2014):
+
+r.squaredGLMM(ML.all.correct.lmer.0)
+r.squaredGLMM(ML.all.correct.lmer.1)
+r.squaredGLMM(ML.all.correct.lmer.2)
+
+
+
+
 
 
 
