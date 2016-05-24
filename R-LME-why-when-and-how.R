@@ -30,6 +30,8 @@ getwd()
 # -- where are the data?
 
 setwd("/Users/robdavies/Dropbox/teaching_PG-statistics/demo data")
+# -- replace the file path given in quotes with an address appropriate for your computer
+# e.g. setwd("my computer/my name/my hard drive")
 
 
 
@@ -43,13 +45,19 @@ setwd("/Users/robdavies/Dropbox/teaching_PG-statistics/demo data")
 # data for the ML lexical decision study
 
 
-# note that the subjects.behaviour.items has data on both words and non words
-
+# note that the subjects.behaviour.items has data on lexical decision responses to words and to nonwords
 
 # subjects.behaviour.items
 
 ML.all <- read.csv("subjects.behaviour.items-310114.csv", header=T, na.strings = "-999")
 summary(ML.all)
+
+
+# -- if you want to examine effects of variables like word frequency (e.g. LgSUBTLCD), you need to analyze the subjects.behaviour.words-310114.csv 
+# database, replacing ML.all in the code that follows with ML.words
+
+ML.words <- read.csv("subjects.behaviour.words-310114.csv", header=T, na.strings = "-999")
+summary(ML.words)
 
 
 
