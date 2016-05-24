@@ -124,7 +124,7 @@ Find (sample) clinics -- test (sample) patients within clinics
 		\end{figure}
 \end{frame}
 
-\begin{frame}{Both approaches cause problems but neither are necessary with linear mixed-effects models}{If we consider variability among individuals or sub-groups, focusing on the average appears risky}
+\begin{frame}{Both approaches cause problems but neither are necessary with linear mixed-effects models}{Given variability among individuals or stimuli, focusing on the average appears risky}
 		\begin{figure}
 		\includegraphics[scale=0.25]{crowd-CC-CatWalker}
 		\end{figure}
@@ -135,23 +135,26 @@ Find (sample) clinics -- test (sample) patients within clinics
 	\item<1->
 	Person-level effects: how reader attributes affect performance
 	\item<2->
-	Word-level effects: how word attributes affect performance
+	Stimulus effects: how stimulus attributes affect performance
 	\item<3->
-	\emph{Interactions}: how word-level effects are modulated by person-level effects
+	\emph{Interactions}: how stimulus effects are modulated by person-level effects
 	\end{itemize}
 \end{frame}
 
 \begin{frame}{ML study -- A concrete usage example}{The data-set -- experimental reading task -- lexical decision}
-		\begin{itemize}
+\begin{itemize}
 		\item
 		All participants saw all 160 words and 160 matched non-words
 		\item
 		Effects of \emph{TOWRE} measures of reading skill, age, ART measure of print exposure
 		\item		
-		Effects of word attributes like length in letters, frequency of occurrence
+		Effects of word attributes like item type (e.g. responses to words vs. non-words)
 		\item
-		Interactions between effects of \emph{who} you and effects of \emph{what} you read e.g. TOWRE non-word score * word frequency
-		\end{itemize}
+		Interactions between effects of \emph{who} you are and effects of \emph{what} kinds of stimuli you must respond to
+\end{itemize}
+\begin{figure}
+		\includegraphics[scale=0.25]{subjects-behaviour-items-310114-csv}
+		\end{figure}
 \end{frame}
 
 \begin{frame}[fragile]{Get the data for practice -- download and read in the ML datset of responses to words and nonwords}{Having read in \emph{subjects.behaviour.items-310114.csv}, use \emph{subset()} to remove errors}
@@ -160,7 +163,11 @@ ML.all <- read.csv("subjects.behaviour.items-310114.csv",
 header=T, na.strings = "-999")
 
 ML.all.correct <- subset(ML.all, RT > 200)
+summary(ML.all.correct)
 \end{verbatim}}
+\begin{figure}
+  	\includegraphics[scale=0.25]{summary-ML-all-correct}
+		\end{figure}
 \end{frame}
 
 
@@ -172,7 +179,7 @@ ML.all.correct <- subset(ML.all, RT > 200)
 \subsection{Dealing with repeated-measures data}
 
 
-\begin{frame}[fragile]{The logic of Analysis of Variance in linear model terms}
+\begin{frame}[fragile]{A linear model (multiple regression) of an effect of some set of conditions}{Linear models assume independence of observations -- but if ou take repeated measures then observations will be \emph{dependent} -- responses will cluster by person or stimulus}
 	\begin{equation}
 		X_{ij} = \mu + (\mu_j - \mu) + \varepsilon_{ij} = \mu + \tau_j + \varepsilon_{ij}
 	\end{equation}
@@ -190,22 +197,22 @@ ML.all.correct <- subset(ML.all, RT > 200)
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{If you take repeated measures then observations will be \emph{dependent} -- correlated -- within each person}{For a slow responder, all their responses will be slow together}
-\begin{itemize}	
-	\item<1->
-	Linear models assume independence of observations
-	\item<2->
-	One way to take the dependence out is by centring all observations for each person on the means (for each person)
-%	\item<3->
-%	Faust et al. (1999) recommend standardising scores before modelling -- for each score, remove the subject mean and divide by the subject SD of scores
-%	\item<4->
-%	If we remove subject means then we take out -- effectively we \emph{partial out the differences between subjects}
-%	\item<5->
-%	We can then isolate the treatment effect we care about	
-\end{itemize}
-\end{frame}
+% \begin{frame}[fragile]{If you take repeated measures then observations will be \emph{dependent} -- correlated -- within each person}{For a slow responder, all their responses will be slow}
+% \begin{itemize}	
+% 	\item<1->
+% 	Linear models assume independence of observations
+% 	\item<2->
+% 	One way to take the dependence out is by centring all observations for each person on the means (for each person)
+% %	\item<3->
+% %	Faust et al. (1999) recommend standardising scores before modelling -- for each score, remove the subject mean and divide by the subject SD of scores
+% %	\item<4->
+% %	If we remove subject means then we take out -- effectively we \emph{partial out the differences between subjects}
+% %	\item<5->
+% %	We can then isolate the treatment effect we care about	
+% \end{itemize}
+% \end{frame}
 
-\begin{frame}[fragile]{We can achieve the same thing as centering by accounting for between and within subject differences in our model}
+\begin{frame}[fragile]{We can account for between and within subject differences in our model}{If you take repeated measures then observations will be \emph{dependent}: for a slow responder, all their responses will be slower; for a difficult stimulus, all responses will be slower}
 	\begin{equation}
 		X_{ij} = \mu + \alert{\pi_i} + \tau_j + \varepsilon_{ij}
 	\end{equation}
@@ -250,19 +257,13 @@ ML.all.correct <- subset(ML.all, RT > 200)
 \subsection{The language as fixed effect fallacy}
 
 
-\begin{frame}{\emph{The language as fixed effect fallacy}}{We need to deal with effects of random variation due to random differences between stimuli as well as differences between people}
-\end{frame}
-
-\begin{frame}[fragile]{\emph{The language as fixed effect fallacy} -- a very famous paper by Clark (1973)}
+\begin{frame}{\emph{The language as fixed effect fallacy} \tiny{Clark, 1973}}
+%{We need to deal with effects of random variation due to random differences between stimuli as well as differences between people}
 \begin{itemize}  
 	\item<1->
-	Historically, psychologists tested effects against error variance due to differences between people
+	Historically, psychologists estimated effects taking into account error variance due to random differences between participants' responses
 	\item<2->
-	They ignored differences due to stimuli 
-	\item<3->
-	This meant they might find significant effects not because there were true differences between conditions
-	\item<4->
-	But because there were also random differences between stimuli in the responses they elicited
+	But ignoring stimulus sampling could mean that effects are inferred to exist even when differences between conditions are due to random differences between responses to different stimuli
 \end{itemize}
 \end{frame}
 
@@ -282,7 +283,7 @@ ML.all.correct <- subset(ML.all, RT > 200)
 \begin{equation}
 			minF' = \frac{MS_{\tau}}{MS_{\pi\tau} + MS_{\beta_k}} = \frac{F_1F_2}{F_1 + F_2}
 \end{equation}
-\begin{itemize}
+\begin{enumerate}
 	\item<1->
 	You start by \emph{aggregating} your data
 	\item<2->
@@ -292,8 +293,8 @@ ML.all.correct <- subset(ML.all, RT > 200)
 	\item<4->
 	You do separate ANOVAs, one for by-subjects (F1) data and one for by-items (F2) data
 	\item<5->
-	 You put F1 and F2 together in the calculation of minF'
-\end{itemize}
+	 You put F1 and F2 together in the calculation of minF' \emph{though psychologists tended to stop at step 4}
+\end{enumerate}
 \end{frame}
 
 
@@ -323,59 +324,58 @@ ML.all.correct <- subset(ML.all, RT > 200)
 \begin{frame}{Repeated measures regression analysis}{The problem with regression on by-items means data}
 \begin{itemize}
 	\item<1->
-	Lorch \& Myers (1990) suggested two solutions to the problem with multiple regression on by-items mean observations
-	\begin{enumerate}
+	Lorch \& Myers (1990) suggested solutions to the problem with multiple regression on by-items mean observations
 	\item<2->
-	Code for subject with $n-1$ dummy variables and complete regression using subject, and subject by effect, predictors
-	\item<3->
-	Perform a regression (linear model) on each subject and complete a t-test or ANOVA on the resulting per-subject coefficients
-	\end{enumerate}
-\end{itemize}
+	A common approach is to perform a regression (linear model) on each subject and complete a t-test or ANOVA on the resulting per-subject coefficients
+  \item<3->
+  Code for subject with $n-1$ dummy variables and complete regression using subject, and subject by effect, predictors
+  \end{itemize}
 \end{frame}
 
-\begin{frame}{Analyses of results with simulated data and alternate procedures suggested that the Lorch \& Myers by-subjects regression approach does not really work}
-     \begin{figure}     
-      \includegraphics[scale=0.45]{LME-baayen-2008-data-simulation-analyses}
-      \caption{Baayen et al. (2008): simulated data with or without effects present: item = by-items means regression; lmerS = LM90 per-subject regression approach}
+\begin{frame}{Analyses of results with simulated data and alternate procedures suggested that the per-subjects regression approach does not work well \emph{\tiny{Baayen et al. (2008)}}}{You can see how problems can arise -- the approach cannot take into account variation in the reliability of estimates}
+\begin{figure}     
+     \includegraphics[scale=0.35]{why-how-when-per-subj-estimates}
+      \caption{Per-subject estimates (points) with standard errors -- ML data-set -- intercepts and the effect of item type (words vs. non-words)}
      \end{figure}     
+% \begin{figure}     
+%      \includegraphics[scale=0.45]{LME-baayen-2008-data-simulation-analyses}
+%       \caption{Baayen et al. (2008): simulated data with or without effects present: item = by-items means regression; lmerS = LM90 per-subject regression approach}
+%      \end{figure}     
 \end{frame}
 
-\begin{frame}{If you do repeated measures studies of any kind, you need to take the `language-as-fixed-effect fallacy' into account -- participant and stimulus random effects}
-\end{frame}
+% \begin{frame}{If you do repeated measures studies of any kind, you need to take the `language-as-fixed-effect fallacy' into account -- participant and stimulus random effects}
+% \end{frame}
 
 
 \subsection{Shift to mixed-effects models}
 
 
-\begin{frame}{Dealing with clustered data -- start by ignoring the multilevel structure}{You could try to run an ordinary linear model including subject-level and item-level variables}
-	\begin{equation}
-	RT = \beta_0 +  \beta_{word reading ability} + \beta_{itemtype} + \beta_{word*itemtype} + \epsilon
-	\end{equation}
-\begin{itemization}
-\item<1->
-But it is usually incorrect to assume the multilevel structure can be represented by the explanatory variables alone
-  \begin{itemize}
-	\item<2->
-	What about effect of \emph{random} variation between \emph{participants}?
-	\item<2->
-	What about effect of \emph{random} variation between \emph{stimuli}?
-	\end{itemize}
-\end{itemize}
-\end{frame}
+% \begin{frame}{Dealing with clustered data -- start by ignoring the multilevel structure}{You could try to run an ordinary linear model including subject-level and item-level variables}
+% 	\begin{equation}
+% 	RT = \beta_0 +  \beta_{word reading ability} + \beta_{itemtype} + \beta_{word*itemtype} + \epsilon
+% 	\end{equation}
+% \begin{itemization}
+% \item<1->
+% But it is usually incorrect to assume the multilevel structure can be represented by the explanatory variables alone
+%   \begin{itemize}
+% 	\item<2->
+% 	What about effect of \emph{random} variation between \emph{participants}?
+% 	\item<2->
+% 	What about effect of \emph{random} variation between \emph{stimuli}?
+% 	\end{itemize}
+% \end{itemize}
+% \end{frame}
 
-\begin{frame}[fragile]{A more realistic repeated measures model of the item type and reading ability effects}{Taking into account random effects of subjects and items}
+\begin{frame}[fragile]{A more realistic repeated measures model of the item type and reading ability effects}{The model is better because it takes into account random effects of subjects and items -- we could do this by adding predictors that coded for participant or item identity, and for the effects of interactions between effect of participant and effect of stimulus type}
 	\footnotesize{\begin{equation}
 	RT = \beta_0 +  \beta_{word reading ability} + \beta_{itemtype} + \beta_{ability*itemtype} + 
 	\emph{\beta_{subject}} + \beta_{item} + \emph{\beta_{subject*itemtype}} + \epsilon
 	\end{equation}}
 \begin{itemize}
 	\item<1->
-	What about effect of random variation between participants?
-		\begin{itemize}
-		\item<2->
-		Allow \emph{intercept varies} -- random effect of subject -- some have slower average some have faster average than average overall
-		\item<3->
-		Allow \emph{effect of item type varies} -- random effect of subject -- subjects can have effects of different direction or size
+	 Allow \emph{intercept to vary} -- random effect of subject -- some have slower average some have faster average than average overall
+	\item<3->
+	 Allow \emph{slope of item type effect to vary} -- random effect of subject -- subjects can experience effects of (item type) with different directions or sizes
 		\end{itemize}
 	\end{itemize}
 \end{frame}
@@ -390,24 +390,17 @@ But it is usually incorrect to assume the multilevel structure can be represente
 	What about effect of random variation between stimuli?
 		\begin{itemize}
 		\item<2->
-		Allow \emph{intercept varies} -- random effect of items -- some items harder and elicit slower average response and some easier and elicit faster responses on average than average overall
+		Allow \emph{intercept to vary} -- random effect of items -- some items harder and elicit slower average response and some easier and elicit faster responses on average than average overall
 		\item<3->
-		Allow \emph{effect of reading ability varies} -- within-items effect of subject type can be different for different items
+		Allow \emph{effect of reading ability to vary} -- within-items effect of subject type can be different for different items
 		\end{itemize}
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{We do not model random effects directly -- we just estimate the \emph{spread} or variance in intercepts}{\emph{random intercepts} -- predicted differences (adjustments) between the overall average and the group e.g. person average}
-     \begin{figure}     
-      \includegraphics[scale=0.2]{learners-persubj-oneplot-random-intercepts-freq-RT-010314}
-      \small{\caption{Learner data -- random intercepts, fixed slope in frequency effect}}
-     \end{figure} 
-\end{frame}
-
-\begin{frame}{In fact, we can estimate the variance of random differences in the \emph{slopes} of the effects of theoretical interest}{\emph{random slopes} -- predicted differences (adjustments) between the overall effect and the group e.g. per-person effect}
+\begin{frame}{We do not model random effects directly -- we just estimate the \emph{spread} or variance of random differences}{\emph{random intercepts} -- predicted differences (adjustments) between the overall average and the group e.g. person average -- and \emph{random slopes} -- predicted differences (adjustments) between the overall effect and the group e.g. per-person effect}
 \begin{figure}     
-      \includegraphics[scale=0.2]{learners-persubj-oneplot-random-intercepts-slopes-freq-RT-010314}
-      \caption{Individual differences in effect of word frequency on RTs}
+      \includegraphics[scale=0.2]{RT-words-freq-persubj-loess}
+      \caption{Individual differences in intercepts and in the effect of word frequency on lexical decision RTs}
      \end{figure}  
 \end{frame}    
 
@@ -437,84 +430,125 @@ But it is usually incorrect to assume the multilevel structure can be represente
 \begin{frame}[fragile]{We focus on building a series of models up to the most complex model supported by the data}
 \begin{itemize}
  \item<1->
-	A minimal (empty) model of the data might assume that the data we observe can be predicted only by the average value of observations -- overall average -- intercept 
-	\begin{itemize}
+	A minimal (empty) model of the data might assume that the data we observe can be predicted only given the average value of observations -- intercept 
+%	\begin{itemize}
 	\item<2->
 	And random effects of grouping variables like subjects or stimulus items on the average outcome
-	\end{itemize}
-	\item<3->
-	The question is then whether our capacity to predict observations is improved by adding other terms
 \end{itemize}
+% 	\item<3->
+% 	The question is then whether our capacity to predict observations is improved by adding other terms
+% \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Examine the fixed effects then the random effects}
-\begin{itemize}
-	\item<1->
-	Start by examining models varying in the \emph{fixed effects} but constant in the \emph{random effects}
-	\item<2->
-	Fitted using maximum likelihood ($REML=FALSE$) method
-	\begin{itemize}
-	\item<3->
-	Think about simpler models being \emph{nested} inside -- i.e. as simplifications of -- more complex models
-	\end{itemize}
-	\item<4->
-	Add effects of interest -- because they were manipulated, are of theoretical or practical interest -- fixed effects in series	
-\end{itemize}
-\end{frame}
+% \begin{frame}[fragile]{Examine the fixed effects then the random effects}
+% \begin{itemize}
+% 	\item<1->
+% 	Start by examining models varying in the \emph{fixed effects} but constant in the \emph{random effects}
+% 	\item<2->
+% 	Fitted using maximum likelihood ($REML=FALSE$) method
+% 	\begin{itemize}
+% 	\item<3->
+% 	Think about simpler models being \emph{nested} inside -- i.e. as simplifications of -- more complex models
+% 	\end{itemize}
+% 	\item<4->
+% 	Add effects of interest -- because they were manipulated, are of theoretical or practical interest -- fixed effects in series	
+% \end{itemize}
+% \end{frame}
 
-\begin{frame}[fragile]{R code for running a linear mixed-effects model is similar to the code for running a linear model}{Start with an empty model specifying just the fixed effect of the intercept (overall average outcome) and the random effects of subjects and of items on intercepts (random differences in average outcomes)}
+\begin{frame}[fragile]{R code for running a linear mixed-effects model}{Start with an empty model specifying just the fixed effect of the intercept (overall average outcome) and the random effects of subjects and of items on intercepts (random differences in average outcomes)}
 \begin{verbatim}
 full.lmer0 <- lmer(logrt ~
-                     
-                     (1|subjectID) + (1|item_name),
-                   
-data = ML.all.correct, REML = F)
-\end{verbatim}
-\begin{itemize}
-	\item<1->
-	\verb:lmer(): -- run a \emph{Linear Mixed-effects model} rather than \emph{lm() linear model}
-	\item<2->
- 	\verb:(1|subjectID) + (1|item_name): specify random effects
-	\begin{itemize}
-	\item<3->
-	\verb:(1|...): -- random effect on intercepts
-	\item<4->
-	\verb:subjectID:  or \verb:item_name: -- effects of subjects or items -- specified by subject identity code (ID) or item name in coding variables
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]{REML and ML estimation and model comparison}
-\begin{verbatim}
-full.lmer0 <- lmer(logrt ~
-                    
                     (1|subjectID) + (1|item_name),
-                  
-data = subjects.behaviour.items.nomissing, REML = F)
+ data = ML.all.correct)
 \end{verbatim}
 \begin{itemize}
 	\item<1->
-	\verb:REML = F: -- maximum likelihood estimation
+	\verb:lmer(): run a \emph{Linear Mixed-effects model} using the \emph{lmer()} function
 	\item<2->
-	Maximum likelihood estimation seeks to find those parameter values that, given the data and our choice of model, make the model's predicted values most similar to the observed values
+  \verb:full.lmer0 <- lmer(): the model creates an object \emph{full.lmer0} we can work with e.g. to get a summary of estimates
+  \item<3->
+  \verb:logrt ~ (1|subjectID) + (1|item_name): the \emph{lmer()} function interprets the model formula we specify
+  \item<4->
+  \verb:data = ML.all.correct: applying that model to the data we name \emph{ML.all.correct} 
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[fragile]{R code for running a linear mixed-effects model}{Start with an empty model specifying just the fixed effect of the intercept (overall average outcome) and the random effects of subjects and of items on intercepts (random differences in average outcomes)}
+\begin{verbatim}
+full.lmer0 <- lmer(logrt ~
+                     (1|subjectID) + (1|item_name),
+data = ML.all.correct)
+\end{verbatim}
+\begin{itemize}
+  \item<1->
+   \verb:(1|subjectID) + (1|item_name): specify random effects
+	\begin{itemize}
+	 \item<2->
+	 \verb:(1|...): -- random effect on intercepts
+	 \item<3->
+	 \verb:subjectID:  or \verb:item_name: -- effects of subjects or items -- specified by subject identity code (ID) or item name in coding variables
+  \end{itemize}
+  \item<4->
+  The intercept \verb:logrt ~ 1: is taken as required automatically, given the random intercepts terms
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{LMEs -- build-up the \emph{fixed} effects while holding the \emph{random} effects constant}{To empty model, for the ML study analysis, add subject attribute variables as predictors}
+\begin{frame}[fragile]{R code for running a linear mixed-effects model}{An empty model specifying just the fixed effect of the intercept and random effects of subjects and of items on intercepts}
+\begin{verbatim}
+full.lmer0 <- lmer(logrt ~
+                     (1|subjectID) + (1|item_name),
+data = ML.all.correct)
+summary(full.lmer0)
+\end{verbatim}
+\verb:summary(full.lmer0): will deliver model estimates
+\begin{figure}     
+      \includegraphics[scale=0.2]{ML-all-correct-lmer-0-summary}
+      \caption{Notice the random effects (variance) components and the fixed effect (intercept) summary}
+     \end{figure}  
+\end{frame}  
+
+\begin{frame}[fragile]{R code for running a linear mixed-effects model -- \emph{notice the moving parts}}
+\begin{equation}
+\alert{full.lmer0} <- lmer(\alert{logrt} \sim (1|\alert{subjectID}) + (1|\alert{itemname}), data = \alert{ML.all.correct})
+\end{equation}
+\begin{itemize}
+  \item<1->
+	You specify the model name \alert{full.lmer0}, the dependent variable \alert{logrt}, the subject and item coding variables \alert{subjectID}, \alert{itemname}, and the name of the data frame \alert{ML.all.correct}
+  \item<2->
+  You need to have previously used \emph{read.csv()} to enter the data frame in R's workspace, and you need to know what the variables in the dataframe are called
+\end{itemize}
+\end{frame} 
+
+% \begin{frame}[fragile]{REML and ML estimation and model comparison}
+% \begin{verbatim}
+% full.lmer0 <- lmer(logrt ~
+%                     
+%                     (1|subjectID) + (1|item_name),
+%                   
+% data = subjects.behaviour.items.nomissing, REML = F)
+% \end{verbatim}
+% \begin{itemize}
+% 	\item<1->
+% 	\verb:REML = F: -- maximum likelihood estimation
+% 	\item<2->
+% 	Maximum likelihood estimation seeks to find those parameter values that, given the data and our choice of model, make the model's predicted values most similar to the observed values
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}[fragile]{LMEs -- build-up the \emph{fixed} effects while holding the \emph{random} effects constant}
+% {To empty model, for the ML study analysis, add subject attribute variables as predictors}
 \footnotesize{\begin{verbatim}
 full.lmer1 <- lmer(logrt ~
                   
 zAge + zTOWRE_wordacc + zTOWRE_nonwordacc +
                      
 (1|subjectID) + (1|item_name),
-                   
 data = ML.all.correct, REML = F)
-
 summary(full.lmer1)
 \end{verbatim}}
 \begin{itemize}
 	\item<1->
-	\verb:zAge + zTOWRE_wordacc: add fixed effects -- just as in linear models
+	\verb:zAge + zTOWRE_wordacc: add fixed effects -- z- because they were standardized
 	\item<2->
  	\emph{Fixed effects} reproducible effects -- manipulated, selected -- of theoretical or practical interest
 	\item<3->
@@ -522,7 +556,21 @@ summary(full.lmer1)
 \end{itemize}
 \end{frame}
 
-\begin{frame}{How do we know if increasing \emph{model complexity} by adding predictors actually helps us to account for variation in outcome values?}{Simplicity and parsimony}
+\begin{frame}[fragile]{LMEs -- build-up the \emph{fixed} effects while holding the \emph{random} effects constant}
+% {To empty model, for the ML study analysis, add subject attribute variables as predictors}
+\footnotesize{\begin{verbatim}
+full.lmer1 <- lmer(logrt ~
+zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + (1|subjectID) + (1|item_name),
+data = ML.all.correct, REML = F)
+summary(full.lmer1)
+\end{verbatim}}
+\begin{figure}     
+      \includegraphics[scale=0.2]{ML-all-correct-lmer-1-summary}
+      \caption{Notice the fixed effect coefficients estimates are presented in a regression style table}
+     \end{figure}
+\end{frame}
+
+\begin{frame}{How do we know if increasing \emph{model complexity} by adding predictors actually helps us to account for variation in outcome values?}{Simplicity and parsimony -- we look at evaluating models, next}
 \begin{itemize}
  \item<1->
 	Trade-off between too much and too little simplicity in model selection -- variable selection
