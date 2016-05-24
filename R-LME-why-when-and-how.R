@@ -12,6 +12,11 @@ library(reshape2)
 library(plyr)
 library(gridExtra)
 library(lme4)
+library(dplyr)
+library(broom)
+library(MuMIn)
+library(lmerTest)
+library(grid)
 
 
 
@@ -79,7 +84,7 @@ phist <- ggplot(ML.all, aes(x=RT))
 phist + geom_histogram()
 
 
-# clearly there can be no -ve RTs -- we can remove them through at least two ways 
+# clearly there can be no -ve RTs -- we can remove them through at least two methods 
 # -- one way is through conditional subsetting
 # -- set the threshold at 200ms: any shorter must be error or incorrect button press registration
 
@@ -197,6 +202,77 @@ summary(ML.all.correct.lm.2)
 
 BIC(ML.all.correct.lm.0, ML.all.correct.lm.1, ML.all.correct.lm.2)
 AIC(ML.all.correct.lm.0, ML.all.correct.lm.1, ML.all.correct.lm.2)
+
+
+
+# slopes as outcomes analysis  ##########################################################################################
+
+
+# a widely used approximation to linear mixed-effects models, which we do next, is to model the fixed effects of interest that are within-subjects effects
+# -- here, this includes the effects of item type (words vs. nonwords), length and neighbourhood size -- separately for each subject
+# -- one might then (see e.g. Lorch & Myers, 1990) test whether the per-subject coefficients are significantly different from zero
+
+
+# this is quite easy to do using the dplyr function do() and the broom function tidy():-
+
+persubjlm <- ML.all.correct %>% group_by(subjectID) %>% do(tidy( lm(logrt ~ item_type + zLength + zOrtho_N, data=.) ))
+persubjlm$term <- as.factor(persubjlm$term)
+
+summary(persubjlm)
+
+
+# -- we can plot the coefficients with standard error bars to illustrate the variation in fixed effects (intercept, effects of item type, length or neighbourhood)
+
+# -- want to order coefficients by mean speed -- calculate meanRT per person
+
+ML.all.corrects.subjmeanRTs <- ML.all.correct %>%
+  group_by(subjectID) %>%
+  summarise(meanRT = mean(RT))
+
+# -- merge meanRTs with the persubjlm dataframe
+
+ML.all.meanRT.persubjlm <- merge(persubjlm, ML.all.corrects.subjmeanRTs, by = "subjectID")
+
+
+# -- plot a grid showing variation in the item type and intercepts estimates calculated per subject
+
+pdf("why-how-when-per-subj-estimates.pdf", w = 20, h = 10)
+
+# -- first filter the dataframe to just the intercept estimates
+ML.all.meanRT.persubjlm.2.int <- filter(ML.all.meanRT.persubjlm.2, term == '(Intercept)')
+
+# -- then draw the plot but do not show it
+ML.all.intercepts <- ggplot(ML.all.meanRT.persubjlm.2.int, aes(x = subjectID, y = estimate, ymin = estimate - std.error, ymax = estimate + std.error))
+ML.all.intercepts <- ML.all.intercepts + geom_linerange(colour = "grey", size = 1.5) + geom_point(colour = "black", size = 4) + theme_bw() + ylab("Intercept (+/- SE) of decision RTs") + xlab("subject ID")
+ML.all.intercepts <- ML.all.intercepts + theme(axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text.y = element_text(size = 20), axis.text.x = element_text(size = 20), panel.grid = element_blank())
+# ML.all.intercepts
+
+# -- then filter the dataframe to just the item type effect estimates
+ML.all.meanRT.persubjlm.2.type <- filter(ML.all.meanRT.persubjlm.2, term == 'item_typeword')
+
+# -- order the dataframe by type effect size
+ML.all.meanRT.persubjlm.2.type <- within(ML.all.meanRT.persubjlm.2.type, {
+  subjectID <- reorder(subjectID, estimate)
+})
+
+# -- then draw the plot but do not show it
+ML.all.type <- ggplot(ML.all.meanRT.persubjlm.2.type, aes(x = subjectID, y = estimate, ymin = estimate - std.error, ymax = estimate + std.error))
+ML.all.type <- ML.all.type + geom_linerange(colour = "grey", size = 1.5) + geom_point(colour = "black", size = 4) + theme_bw() + ylab("Item type effect (+/- SE) on decision RTs") + xlab("subject ID")
+ML.all.type <- ML.all.type + theme(axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text.y = element_text(size = 20), axis.text.x = element_text(size = 20), panel.grid = element_blank())
+
+# -- print the plots to a 1 x 2 grid
+
+grid.newpage()
+
+pushViewport(viewport(layout = grid.layout(1,2)))
+
+vplayout <- function(x,y)
+  viewport(layout.pos.row = x, layout.pos.col = y)
+
+print(ML.all.intercepts, vp = vplayout(1,1))
+print(ML.all.type, vp = vplayout(1,2))
+
+dev.off()
 
 
 
