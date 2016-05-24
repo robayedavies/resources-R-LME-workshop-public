@@ -585,5 +585,25 @@ summary(full.lmer1)
 
 
 
+\section{Summary}
+
+
+
+\begin{frame}{Summary}{The advantages of mixed-effects models in R}
+\begin{itemize}
+  \item<1->
+	Mixed-effects models are required where clusters of observations are analyzed
+	\begin{itemize}
+	\item<2->
+	Repeated measures designs -- multiple observations per participant or stimulus 
+	\end{itemize}
+	\item<3->
+	Traditional methods e.g. slopes-as-outcomes are approximations to linear mixed-effects models
+	\item<4->
+	The \emph{lmer()} R code allows you to specify your model $logrt \sim itemtype*ability + (1|subject$ in a simple, flexible language
+\end{itemize}
+\end{frame}
+
+
 
 \end{document}
