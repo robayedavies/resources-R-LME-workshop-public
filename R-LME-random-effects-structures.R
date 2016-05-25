@@ -351,7 +351,7 @@ summary(full.lmer.3)
 
 
 
-# we then move to linear mixed-effects modelling ###############################################################
+# compare the models to check the utility of added complexity ###########################################################
 
 
 # we can compare model fits using information theoretic measures like AIC and BIC
@@ -376,29 +376,20 @@ anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3)
 # > anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3)
 # Data: ML.all.correct
 # Models:
-#   full.lmer.0: logrt ~ (1 | subjectID) + (1 | item_name)
-# full.lmer.1: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + (1 | subjectID) + 
-#   full.lmer.1:     (1 | item_name)
-# full.lmer.2: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + item_type + 
-#   full.lmer.2:     zLength + zOrtho_N + (1 | subjectID) + (1 | item_name)
-# full.lmer.3: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type + 
-# full.lmer.3:     zLength + zOrtho_N) + (1 | subjectID) + (1 | item_name)
+#   object: logrt ~ (1 | subjectID) + (1 | item_name)
+# ..1: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + (1 | subjectID) + 
+#   ..1:     (1 | item_name)
+# ..2: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + item_type + 
+#   ..2:     zLength + zOrtho_N + (1 | subjectID) + (1 | item_name)
+# ..3: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type + 
+#   ..3:     zLength + zOrtho_N) + (1 | subjectID) + (1 | item_name)
 # Df    AIC    BIC logLik deviance    Chisq Chi Df Pr(>Chisq)    
-# full.lmer.0  4 -17981 -17952 8994.4   -17989                               
-# full.lmer.1  7 -17982 -17931 8998.0   -17996   7.1782      3    0.06643 .  
-# full.lmer.2 10 -18320 -18247 9169.7   -18340 343.5400      3    < 2e-16 ***
-#   full.lmer.3 19 -18416 -18278 9227.0   -18454 114.5129      9    < 2e-16 ***
+# object  4 -17981 -17952 8994.4   -17989                               
+# ..1     7 -17982 -17931 8998.0   -17996   7.1782      3    0.06643 .  
+# ..2    10 -18320 -18247 9169.7   -18340 343.5400      3    < 2e-16 ***
+#   ..3    19 -18416 -18278 9227.0   -18454 114.5129      9    < 2e-16 ***
 #   ---
 #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-
-# get confidence intervals for effects estimates for last model
-
-summary(full.lmer.3)
-confint(full.lmer.3, method = "Wald")  
-
-
-# week six workbook reference [3] #######################################################################
 
 
 # compare models of varying complexity -- and evaluate on exactly the same basis as the lm models
@@ -406,7 +397,6 @@ confint(full.lmer.3, method = "Wald")
 anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3)  
 
 # we could use the model summary for the last model for report
-# we cannot get p-values for model effect estimates directly but can get confidence intervals
 # -- if 95% confidence intervals do not include 0 then the effect can be claimed as significant
 
 summary(full.lmer.3)
@@ -424,9 +414,6 @@ confint(full.lmer.3, method = "Wald")
 
 # we compare models that include: (i.) both random effects of subjects and items on intercepts, as specified for model 3 
 # (ii.) just the random effect of subjects on intercepts; and (iii.) just the random effect of items
-
-
-# week six workbook reference [4] #######################################################################
 
 
 # (1) REML=TRUE model with random effects of subjects and items on intercepts
@@ -510,10 +497,6 @@ anova(full.lmer.3, full.lmer.3.s)
 #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 
-
-# week six workbook reference [5] #######################################################################
-
-
 # we can then evaluate whether it would be justified to include the random effects of subjects on the slopes of the effects of the 
 # fixed effects vaariables.
 
@@ -543,9 +526,10 @@ summary(full.lmer.3.slopes)
 confint(full.lmer.3.slopes, method = "Wald")
 
 # > summary(full.lmer.3.slopes)
-# Linear mixed model fit by maximum likelihood  ['lmerMod']
+# Linear mixed model fit by maximum likelihood  
+# t-tests use  Satterthwaite approximations to degrees of freedom ['lmerMod']
 # Formula: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type +  
-# zLength + zOrtho_N) + (item_type + zLength + zOrtho_N + 1 |      subjectID) + (1 | item_name)
+#                                                                   zLength + zOrtho_N) + (item_type + zLength + zOrtho_N + 1 |      subjectID) + (1 | item_name)
 # Data: ML.all.correct
 # 
 # AIC      BIC   logLik deviance df.resid 
@@ -559,49 +543,67 @@ confint(full.lmer.3.slopes, method = "Wald")
 #   Groups    Name          Variance  Std.Dev. Corr             
 # item_name (Intercept)   7.340e-04 0.027092                  
 # subjectID (Intercept)   3.018e-03 0.054936                  
-# item_typeword 1.483e-03 0.038506 -0.43            
+# item_typeword 1.483e-03 0.038507 -0.43            
 # zLength       1.032e-05 0.003212  0.78 -0.90      
 # zOrtho_N      1.526e-05 0.003906  0.44 -1.00  0.90
 # Residual                8.784e-03 0.093724                  
 # Number of obs: 10254, groups:  item_name, 320; subjectID, 34
 # 
 # Fixed effects:
-#                                   Estimate Std. Error t value
-# (Intercept)                      2.8673455  0.0097556  293.92
-# zAge                             0.0134423  0.0098701    1.36
-# zTOWRE_wordacc                   0.0111710  0.0127478    0.88
-# zTOWRE_nonwordacc               -0.0296577  0.0126649   -2.34
-# item_typeword                   -0.0873559  0.0075026  -11.64
-# zLength                          0.0089692  0.0022906    3.92
-# zOrtho_N                         0.0026117  0.0023197    1.13
-# zAge:item_typeword              -0.0005010  0.0071144   -0.07
-# zAge:zLength                     0.0008601  0.0013264    0.65
-# zAge:zOrtho_N                    0.0012614  0.0013837    0.91
-# zTOWRE_wordacc:item_typeword    -0.0213781  0.0091916   -2.33
-# zTOWRE_wordacc:zLength           0.0027968  0.0017216    1.62
-# zTOWRE_wordacc:zOrtho_N         -0.0005204  0.0018010   -0.29
-# zTOWRE_nonwordacc:item_typeword  0.0238701  0.0091318    2.61
-# zTOWRE_nonwordacc:zLength       -0.0053559  0.0017122   -3.13
-# zTOWRE_nonwordacc:zOrtho_N      -0.0018776  0.0017913   -1.05
+#   Estimate Std. Error         df t value Pr(>|t|)    
+# (Intercept)                      2.867e+00  9.756e-03  3.746e+01 293.917  < 2e-16 ***
+#   zAge                             1.344e-02  9.870e-03  3.393e+01   1.362 0.182198    
+# zTOWRE_wordacc                   1.117e-02  1.275e-02  3.394e+01   0.876 0.387022    
+# zTOWRE_nonwordacc               -2.966e-02  1.266e-02  3.395e+01  -2.342 0.025201 *  
+#   item_typeword                   -8.736e-02  7.503e-03  4.804e+01 -11.643 1.33e-15 ***
+#   zLength                          8.969e-03  2.291e-03  2.523e+02   3.916 0.000116 ***
+#   zOrtho_N                         2.612e-03  2.320e-03  2.330e+02   1.126 0.261378    
+# zAge:item_typeword              -5.010e-04  7.115e-03  3.387e+01  -0.070 0.944270    
+# zAge:zLength                     8.601e-04  1.326e-03  9.410e+01   0.648 0.518269    
+# zAge:zOrtho_N                    1.261e-03  1.384e-03  7.208e+01   0.912 0.364999    
+# zTOWRE_wordacc:item_typeword    -2.138e-02  9.192e-03  3.393e+01  -2.326 0.026142 *  
+#   zTOWRE_wordacc:zLength           2.797e-03  1.722e-03  9.599e+01   1.624 0.107549    
+# zTOWRE_wordacc:zOrtho_N         -5.204e-04  1.801e-03  7.435e+01  -0.289 0.773403    
+# zTOWRE_nonwordacc:item_typeword  2.387e-02  9.132e-03  3.394e+01   2.614 0.013250 *  
+#   zTOWRE_nonwordacc:zLength       -5.356e-03  1.712e-03  9.644e+01  -3.128 0.002327 ** 
+#   zTOWRE_nonwordacc:zOrtho_N      -1.878e-03  1.791e-03  7.473e+01  -1.048 0.297921    
+# ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Correlation matrix not shown by default, as p = 16 > 12.
+# Use print(x, correlation=TRUE)  or
+# vcov(x)	 if you need it
 # 
 # > confint(full.lmer.3.slopes, method = "Wald")
 # 2.5 %       97.5 %
-#   (Intercept)                      2.8482248044  2.886466108
-# zAge                            -0.0059027425  0.032787314
-# zTOWRE_wordacc                  -0.0138141889  0.036156181
-# zTOWRE_nonwordacc               -0.0544804624 -0.004834965
-# item_typeword                   -0.1020607740 -0.072651083
-# zLength                          0.0044796160  0.013458743
-# zOrtho_N                        -0.0019348814  0.007158352
-# zAge:item_typeword              -0.0144450893  0.013443025
-# zAge:zLength                    -0.0017395403  0.003459724
-# zAge:zOrtho_N                   -0.0014505493  0.003973376
-# zTOWRE_wordacc:item_typeword    -0.0393933764 -0.003362846
-# zTOWRE_wordacc:zLength          -0.0005775413  0.006171083
-# zTOWRE_wordacc:zOrtho_N         -0.0040503341  0.003009439
-# zTOWRE_nonwordacc:item_typeword  0.0059719947  0.041768130
-# zTOWRE_nonwordacc:zLength       -0.0087116601 -0.002000068
-# zTOWRE_nonwordacc:zOrtho_N      -0.0053884456  0.001633199
+#   .sig01                                     NA           NA
+# .sig02                                     NA           NA
+# .sig03                                     NA           NA
+# .sig04                                     NA           NA
+# .sig05                                     NA           NA
+# .sig06                                     NA           NA
+# .sig07                                     NA           NA
+# .sig08                                     NA           NA
+# .sig09                                     NA           NA
+# .sig10                                     NA           NA
+# .sig11                                     NA           NA
+# .sigma                                     NA           NA
+# (Intercept)                      2.8482247867  2.886466127
+# zAge                            -0.0059027624  0.032787334
+# zTOWRE_wordacc                  -0.0138142143  0.036156207
+# zTOWRE_nonwordacc               -0.0544804880 -0.004834939
+# item_typeword                   -0.1020608824 -0.072650976
+# zLength                          0.0044796174  0.013458743
+# zOrtho_N                        -0.0019348796  0.007158351
+# zAge:item_typeword              -0.0144452133  0.013443149
+# zAge:zLength                    -0.0017395424  0.003459726
+# zAge:zOrtho_N                   -0.0014505502  0.003973377
+# zTOWRE_wordacc:item_typeword    -0.0393935373 -0.003362686
+# zTOWRE_wordacc:zLength          -0.0005775436  0.006171085
+# zTOWRE_wordacc:zOrtho_N         -0.0040503351  0.003009440
+# zTOWRE_nonwordacc:item_typeword  0.0059718359  0.041768289
+# zTOWRE_nonwordacc:zLength       -0.0087116627 -0.002000066
+# zTOWRE_nonwordacc:zOrtho_N      -0.0053884463  0.001633200
 
 
 # Is the random effect of subjects on the slopes of the item type, length and orthographic neighbourhood effects justified?
@@ -610,19 +612,21 @@ confint(full.lmer.3.slopes, method = "Wald")
 anova(full.lmer.3, full.lmer.3.slopes)
 
 # > anova(full.lmer.3, full.lmer.3.slopes)
+# refitting model(s) with ML (instead of REML)
 # Data: ML.all.correct
 # Models:
-# full.lmer.3: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type + 
-# full.lmer.3:     zLength + zOrtho_N) + (1 | subjectID) + (1 | item_name)
-# full.lmer.3.slopes: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type + 
-# full.lmer.3.slopes:     zLength + zOrtho_N) + (item_type + zLength + zOrtho_N + 1 | 
-# full.lmer.3.slopes:     subjectID) + (1 | item_name)
+#   object: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type + 
+#                                                                    object:     zLength + zOrtho_N) + (1 | subjectID) + (1 | item_name)
+# ..1: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type + 
+#                                                               ..1:     zLength + zOrtho_N) + (item_type + zLength + zOrtho_N + 1 | 
+#                                                                                                 ..1:     subjectID) + (1 | item_name)
 # Df    AIC    BIC logLik deviance  Chisq Chi Df Pr(>Chisq)    
-# full.lmer.3        19 -18416 -18278 9227.0   -18454                             
-# full.lmer.3.slopes 28 -18740 -18538 9398.1   -18796 342.25      9  < 2.2e-16 ***
+# object 19 -18416 -18278 9227.0   -18454                             
+# ..1    28 -18740 -18538 9398.1   -18796 342.25      9  < 2.2e-16 ***
 #   ---
 #   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 
-
+# -- but notice that some of the random effects covariances have extreme values (r ~ 1) and we should probably 
+# simplify the model by removing them -- see e.g. Bates et al., 2015, arXiv
 
