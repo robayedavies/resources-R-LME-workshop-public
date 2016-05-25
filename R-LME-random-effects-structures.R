@@ -96,6 +96,14 @@ ML.all.correct$logrt <- log10(ML.all.correct$RT)
 # centre predictor variables  ################################################################################
 
 
+# -- it is convenient, computationally, and for later interpretation, to center continuous numeric predictor
+# variables on their means (Cohen, Cohen, Aiken & West, 2003)
+# -- it eliminates multicollinearity due to scaling, a problem where we may seek to estimate interactions
+# between two numeric predictors
+# -- it renders more intuitively interpretable variables that may not have a 'true' zero
+# -- it makes the variables easier to handle for lme4 estimation
+
+
 # centre by standardizing the key subject and item variables -- ML.all.correct
 # -- note lexicality will also be included in the predictor set but as an uncentred factor
 
@@ -105,28 +113,6 @@ ML.all.correct$zTOWRE_nonwordacc <- scale(ML.all.correct$TOWRE_nonwordacc, cente
 ML.all.correct$zLength <- scale(ML.all.correct$Length, center = TRUE, scale = TRUE)
 ML.all.correct$zOrtho_N <- scale(ML.all.correct$Ortho_N, center = TRUE, scale = TRUE)
 ML.all.correct$zBG_Mean <- scale(ML.all.correct$BG_Mean, center = TRUE, scale = TRUE)
-
-
-# has this made any difference to the condition number?
-
-
-# create pairs dbase and check inter-relation of predictor variables
-# -- check out the items variables
-
-summary(ML.all.correct)
-
-ML.all.correct.z.pairs <- ML.all.correct[, c(
-  
-  "zAge", "zTOWRE_wordacc", "zTOWRE_nonwordacc", "zLength",
-  "zOrtho_N", "zBG_Mean"
-  
-)]
-
-# calculate the collinearity diagnostic, condition number, using the collin.fnc() function provided by Baayen's LanguageR library
-
-collin.fnc(na.omit(ML.all.correct.z.pairs))$cnumber
-
-# -- has the condition number been reduced?
 
 
 
