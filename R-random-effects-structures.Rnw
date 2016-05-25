@@ -379,6 +379,13 @@ Remember that you may be obliged to include all effects built-in by design -- if
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Mixed-effects models often specify random effects variances and covariances}{Covariances may be included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions}
+     \begin{figure}     
+      \includegraphics[scale=0.285]{ML-all-correct-covariance-intercept-itemtype-slope}
+            \caption{Per-subject lme coefficients for intercepts and slope of item type effect}
+      \end{figure} 
+\end{frame}
+
 
 
 \section{Linear mixed-effects models and estimation methods}
