@@ -381,7 +381,7 @@ Remember that you may be obliged to include all effects built-in by design -- if
 
 \begin{frame}{Mixed-effects models often specify random effects variances and covariances}{Covariances may be included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions}
      \begin{figure}     
-      \includegraphics[scale=0.285]{ML-all-correct-covariance-intercept-itemtype-slope}
+      \includegraphics[scale=0.25]{ML-all-correct-covariance-intercept-itemtype-slope}
             \caption{Per-subject lme coefficients for intercepts and slope of item type effect}
       \end{figure} 
 \end{frame}
@@ -552,8 +552,8 @@ anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3)
 
 \begin{frame}[fragile]{See that \emph{anova()} results present information criteria statistics for each model plus \emph{likelihood ratio test} comparisons}{Each step increase in complexity appears warranted by improved model fit to data}
      \begin{figure}     
-      \includegraphics[scale=0.5]{ML-items-nomissing-LME-anova}
-      \caption{Model comparisons}
+      \includegraphics[scale=0.5]{ML-all-correct-lmer-anova-summary}
+      %\caption{Model comparisons}
      \end{figure}    
 \end{frame}
 
@@ -573,102 +573,104 @@ anova(full.lmer.0, full.lmer.1, full.lmer.2, full.lmer.3)
 \begin{frame}[fragile]{Examine the random effects}{When the goal of a \alert{confirmatory} analysis is to test hypotheses about one or more critical fixed effects, what random-effects structure should one use?}
 \begin{itemize}
 	\item<1->
-	Current recommendations (Barr et al., 2013; JML): \alert{Maximal random effects structure}
-	\item<2->
-	If you are testing effects manipulated according to a prespecified -- confirmatory study -- design
-	\begin{itemize}
+	Current widely recommended approach (Barr et al., 2013; JML) -- \alert{Maximal random effects structure}
+  \item<2->
+  But this approach is disputed (Bates et al., 2015) -- prefer \emph{parsimonious models}, using LRTs to evaluate the utility of adding parameters
 	\item<3->
-	Test random intercepts -- subjects and items
+	In the maximal approach:-
+	\begin{itemize}
 	\item<4->
+	Test random intercepts -- subjects and items
+	\item<5->
 	Test random slopes for all within-subjects or within-items fixed effects	
 	\end{itemize}
 \end{itemize}
 \end{frame}
 
-% \begin{frame}[fragile]{Current recommendations (Barr et al., 2013; JML): \alert{Maximal random effects structure} -- what does this involve?}{Conceptually, we are working within a framework where we consider a range of potential random effects}
-% \begin{equation}
-%     	Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + U_{1,j} + W_{0,i} + W_{1,i} + \epsilon_{ij}
-% 	\end{equation}
-% \begin{itemize}
-%   \item<1->
-% 	$\sigma_{U_{0,j}}^2 + \sigma_{U_{1,j}}^2 + \sigma_{U_{0,j}U_{1,j}}^2$ variances and \alert{covariance} of random effects
-% 	\item<2->
-%   $\sigma_{W_{0,j}}^2 + \sigma_{W_{1,j}}^2 + \sigma_{W_{0,j}W_{1,j}}^2$variances and \alert{covariance} of random effects
-%   \item<3->
-%   $\sigma_{\epsilon_{ij}}^2$ residuals -- error variance left over
-%   \item<4->
-% 	Covariances are included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions
-% \end{itemize}
-% \end{frame}
-% 
-% \begin{frame}[fragile]{Examine the utility of random effects by comparing REML models with the same fixed effects but varying random effects}{You can begin with random effects of subjects and items on intercepts}
-% \footnotesize{\begin{verbatim}
-% full.lmer.3  <- lmer(logrt ~
-%                                  
-%     (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
-%                                  
-%     (item_type + zLength + zOrtho_N) +
-%                                  
-%     (1|subjectID) + (1|item_name),     
-%                                
-%     data = ML.all.correct, REML = FALSE)
-% summary(full.lmer.3)
-% \end{verbatim}}
-% \begin{itemize}
-% 	\item<1->
-% 	Notice that $REML = TRUE$ -- we are focused on accurate comparisons of the random effects component
-% \end{itemize}
-% \end{frame}
-% 
-% \begin{frame}[fragile]{Compare a model with both random effects of subjects and items on intercepts to a model with just the random effect of items on intercepts}
-% \footnotesize{\begin{verbatim}
-% full.lmer.3.i  <- lmer(logrt ~
-%                                  
-%     (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
-%                                  
-%     (item_type + zLength + zOrtho_N) +
-%                                  
-%     (1|item_name),     
-%                                
-%     data = ML.all.correct, REML = FALSE)
-% summary(full.lmer.3.i)
-% \end{verbatim}}
-% \begin{itemize}
-% 	\item<1->
-% 	\verb:(1|item_name): a comparison with the model including both random intercepts will tell us if the inclusion of the random effect of subjects on intercepts helps the model to fit the data better
-%   \item<2->
-%   Repeat the comparison but for a second model including a random effect of subjects but not of items on intercepts to examine if the random effect of items on intercepts is required
-% \end{itemize}
-% \end{frame}
-% 
-% \begin{frame}[fragile]{Examine the utility of random effects of subjects on slopes of fixed effects are required}
-% \footnotesize{\begin{verbatim}
-% full.lmer.3.slopes  <- lmer(logrt ~
-%                                  
-%     (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
-%                                  
-%     (item_type + zLength + zOrtho_N) +
-%                                  
-%     (item_type + zLength + zOrtho_N + 1|subjectID) + (1|item_name),     
-%                                
-%     data = ML.all.correct, REML = FALSE)
-% summary(full.lmer.3.slopes)
-% \end{verbatim}}
-% \begin{itemize}
-%   \item<1->
-% 	\verb:(item_type + zLength + zOrtho_N + 1|subjectID): we specify a random effect of subjects on intercepts and on the slopes of the item type, length and neighbourhood effects
-% \end{itemize}
-% \end{frame}
-% 
-% \begin{frame}[fragile]{How do we know if increasing \emph{model complexity} helps us to account for variation in outcome values?}{We can use the \emph{anova()} function to compare models with or without the random effect of subjects on the slopes of the within-subjects fixed effects}
-% \begin{verbatim}
-% anova(full.lmer.3, full.lmer.3.slopes)
-% \end{verbatim}
-%      \begin{figure}     
-%       \includegraphics[scale=0.5]{ML-items-nomissing-LME-anova-slopes-comparison}
-%       \caption{Comparison of models with vs. without random effects of subjects on slopes of fixed effects}
-%      \end{figure} 
-% \end{frame}
+\begin{frame}[fragile]{Current recommendations (Barr et al., 2013; JML): \alert{Maximal random effects structure} -- what does this involve?}{Conceptually, we are working within a framework where we consider a range of potential random effects}
+\begin{equation}
+    	Y_{ij} = \beta_{0} + \beta_{1}X_i + U_{0,j} + U_{1,j} + W_{0,i} + W_{1,i} + \epsilon_{ij}
+	\end{equation}
+\begin{itemize}
+  \item<1->
+	$\sigma_{U_{0,j}}^2 + \sigma_{U_{1,j}}^2 + \sigma_{U_{0,j}U_{1,j}}^2$ variances and \alert{covariance} of random effects
+	\item<2->
+  $\sigma_{W_{0,j}}^2 + \sigma_{W_{1,j}}^2 + \sigma_{W_{0,j}W_{1,j}}^2$variances and \alert{covariance} of random effects
+  \item<3->
+  $\sigma_{\epsilon_{ij}}^2$ residuals -- error variance left over
+  \item<4->
+	Covariances are included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examine the utility of random effects by comparing REML models with the same fixed effects but varying random effects}{You can begin with random effects of subjects and items on intercepts}
+\footnotesize{\begin{verbatim}
+full.lmer.3  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (1|subjectID) + (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3)
+\end{verbatim}}
+\begin{itemize}
+	\item<1->
+	Notice that $REML = TRUE$ -- we are focused on accurate comparisons of the random effects component
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Compare a model with both random effects of subjects and items on intercepts to a model with just the random effect of items on intercepts}
+\footnotesize{\begin{verbatim}
+full.lmer.3.i  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3.i)
+\end{verbatim}}
+\begin{itemize}
+	\item<1->
+	\verb:(1|item_name): a comparison with the model including both random intercepts will tell us if the inclusion of the random effect of subjects on intercepts helps the model to fit the data better
+  \item<2->
+  Repeat the comparison but for a second model including a random effect of subjects but not of items on intercepts to examine if the random effect of items on intercepts is required
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Examine the utility of random effects of subjects on slopes of fixed effects are required}
+\footnotesize{\begin{verbatim}
+full.lmer.3.slopes  <- lmer(logrt ~
+                                 
+    (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc)*
+                                 
+    (item_type + zLength + zOrtho_N) +
+                                 
+    (item_type + zLength + zOrtho_N + 1|subjectID) + (1|item_name),     
+                               
+    data = ML.all.correct, REML = FALSE)
+summary(full.lmer.3.slopes)
+\end{verbatim}}
+\begin{itemize}
+  \item<1->
+	\verb:(item_type + zLength + zOrtho_N + 1|subjectID): we specify a random effect of subjects on intercepts and on the slopes of the item type, length and neighbourhood effects
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{How do we know if increasing \emph{model complexity} helps us to account for variation in outcome values?}{We can use the \emph{anova()} function to compare models with or without the random effect of subjects on the slopes of the within-subjects fixed effects}
+\begin{verbatim}
+anova(full.lmer.3, full.lmer.3.slopes)
+\end{verbatim}
+     \begin{figure}     
+      \includegraphics[scale=0.5]{ML-items-nomissing-LME-anova-slopes-comparison}
+      \caption{Comparison of models with vs. without random effects of subjects on slopes of fixed effects}
+     \end{figure} 
+\end{frame}
 
 
 
