@@ -10,6 +10,7 @@ library(psych)
 library(car)
 library(languageR)
 library(lme4)
+library(lmerTest)
 
 
 
@@ -118,26 +119,14 @@ ML.all.correct$zBG_Mean <- scale(ML.all.correct$BG_Mean, center = TRUE, scale = 
 
 # we then move to linear mixed-effects modelling ###############################################################
 
-# week six workbook reference [2] #############################################################################
 
-
-# we will be covering mixed-effects or multilevel modelling in more depth in the remaining parts of the class
-# -- it is worth trying things out beforehand
-# -- and noting the similarities in syntax and logic to the foregoing practice
-
-
-# we return to the full datasets, and I assume you have:
+# I assume you have:
 # -- removed error RTs
 # -- log10 transformed remaining correct RTs
 # -- centred numeric predictor variables
 
 
-# Note that modelling log transformed RTs is recommended, due to the fact that log10 transformations tend to diminish the skew in variable 
-# distributions and in linear mixed-effects models just as in linear models we are basically assuming that residuals are normally distributed 
-# (and residuals will not be normally distributed if the outcome variable is not normally distributed).
-
-
-# we focus on the items data for the purposes of demonstration
+# -- inspect the data for analysis
 
 summary(ML.all.correct)
 
@@ -162,7 +151,8 @@ summary(full.lmer.0)
 # -- results are copied here so that you can check your results:
 
 # > summary(full.lmer.0)
-# Linear mixed model fit by maximum likelihood  ['lmerMod']
+# Linear mixed model fit by maximum likelihood  
+# t-tests use  Satterthwaite approximations to degrees of freedom ['lmerMod']
 # Formula: logrt ~ (1 | subjectID) + (1 | item_name)
 # Data: ML.all.correct
 # 
@@ -181,8 +171,10 @@ summary(full.lmer.0)
 # Number of obs: 10254, groups:  item_name, 320; subjectID, 34
 # 
 # Fixed effects:
-#   Estimate Std. Error t value
-# (Intercept) 2.823356   0.009941     284
+#   Estimate Std. Error        df t value Pr(>|t|)    
+# (Intercept)  2.823356   0.009941 40.520000     284   <2e-16 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 
 # move on to adding in subject attribute variables
@@ -201,7 +193,8 @@ summary(full.lmer.1)
 # -- note I copy the results in but don't bother to copy the results for the correlation of fixed effects
 # 
 # > summary(full.lmer.1)
-# Linear mixed model fit by maximum likelihood  ['lmerMod']
+# Linear mixed model fit by maximum likelihood  
+# t-tests use  Satterthwaite approximations to degrees of freedom ['lmerMod']
 # Formula: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + (1 | subjectID) +      (1 | item_name)
 # Data: ML.all.correct
 # 
@@ -220,26 +213,22 @@ summary(full.lmer.1)
 # Number of obs: 10254, groups:  item_name, 320; subjectID, 34
 # 
 # Fixed effects:
-#   Estimate Std. Error t value
-# (Intercept)        2.8233188  0.0090345  312.50
-# zAge               0.0130997  0.0088762    1.48
-# zTOWRE_wordacc     0.0001089  0.0114635    0.01
-# zTOWRE_nonwordacc -0.0174850  0.0113883   -1.54
+#   Estimate Std. Error         df t value Pr(>|t|)    
+# (Intercept)        2.8233188  0.0090345 42.1200000 312.505   <2e-16 ***
+#   zAge               0.0130997  0.0088762 33.9600000   1.476    0.149    
+# zTOWRE_wordacc     0.0001089  0.0114635 33.9700000   0.010    0.992    
+# zTOWRE_nonwordacc -0.0174850  0.0113883 33.9700000  -1.535    0.134    
+# ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Correlation of Fixed Effects:
+#   (Intr) zAge   zTOWRE_w
+# zAge         0.012                
+# zTOWRE_wrdc -0.006  0.126         
+# zTOWRE_nnwr  0.013  0.093 -0.644  
 
 
-# -- what does a logrt intercept of 2.82 mean in real ms reaction time?
-# -- the value of the log10 of a raw number e.g. 1000 is the power to which we must raise 10 to get the raw number so log10 of 1000 is 3
-log10(1000)
-# -- and if we raise 10 to the power of 3 we get that number back again
-10^3
-
-# -- so what is the real ms value of the estimated intercept of 2.8233188?
-10^2.8233188
-# > 10^2.8233188
-# [1] 665.7617 
-
-
-# add the item attribute variables
+# add the item attribute variables: item type (words or nonwords), item length, orthographic neighbourhood size
 
 full.lmer.2  <- lmer(logrt ~
                        
@@ -256,8 +245,10 @@ full.lmer.2  <- lmer(logrt ~
 summary(full.lmer.2)
 
 # > summary(full.lmer.2)
-# Linear mixed model fit by maximum likelihood  ['lmerMod']
-# Formula: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + item_type +      zLength + zOrtho_N + (1 | subjectID) + (1 | item_name)
+# Linear mixed model fit by maximum likelihood  
+# t-tests use  Satterthwaite approximations to degrees of freedom ['lmerMod']
+# Formula: logrt ~ zAge + zTOWRE_wordacc + zTOWRE_nonwordacc + item_type +  
+#   zLength + zOrtho_N + (1 | subjectID) + (1 | item_name)
 # Data: ML.all.correct
 # 
 # AIC      BIC   logLik deviance df.resid 
@@ -275,14 +266,25 @@ summary(full.lmer.2)
 # Number of obs: 10254, groups:  item_name, 320; subjectID, 34
 # 
 # Fixed effects:
-#   Estimate Std. Error t value
-# (Intercept)        2.8662878  0.0088588   323.6
-# zAge               0.0131823  0.0088714     1.5
-# zTOWRE_wordacc     0.0001078  0.0114573     0.0
-# zTOWRE_nonwordacc -0.0174657  0.0113822    -1.5
-# item_typeword     -0.0865471  0.0035167   -24.6
-# zLength            0.0086453  0.0021976     3.9
-# zOrtho_N           0.0022545  0.0021951     1.0
+#   Estimate Std. Error         df t value Pr(>|t|)    
+# (Intercept)        2.866e+00  8.859e-03  3.907e+01 323.552  < 2e-16 ***
+#   zAge               1.318e-02  8.871e-03  3.397e+01   1.486 0.146521    
+# zTOWRE_wordacc     1.078e-04  1.146e-02  3.398e+01   0.009 0.992550    
+# zTOWRE_nonwordacc -1.747e-02  1.138e-02  3.398e+01  -1.534 0.134173    
+# item_typeword     -8.655e-02  3.517e-03  3.035e+02 -24.610  < 2e-16 ***
+#   zLength            8.645e-03  2.198e-03  3.044e+02   3.934 0.000104 ***
+#   zOrtho_N           2.254e-03  2.195e-03  3.046e+02   1.027 0.305203    
+# ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Correlation of Fixed Effects:
+#   (Intr) zAge   zTOWRE_w zTOWRE_n itm_ty zLngth
+# zAge         0.012                                       
+# zTOWRE_wrdc -0.006  0.126                                
+# zTOWRE_nnwr  0.014  0.093 -0.644                         
+# item_typwrd -0.200  0.000  0.000    0.001                
+# zLength     -0.008  0.000  0.000    0.000    0.031       
+# zOrtho_N    -0.011  0.000  0.000    0.000    0.047  0.602
 
 
 # add interactions
@@ -302,8 +304,10 @@ full.lmer.3  <- lmer(logrt ~
 summary(full.lmer.3)
 
 # > summary(full.lmer.3)
-# Linear mixed model fit by maximum likelihood  ['lmerMod']
-# Formula: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type +      zLength + zOrtho_N) + (1 | subjectID) + (1 | item_name)
+# Linear mixed model fit by maximum likelihood  
+# t-tests use  Satterthwaite approximations to degrees of freedom ['lmerMod']
+# Formula: logrt ~ (zAge + zTOWRE_wordacc + zTOWRE_nonwordacc) * (item_type +  
+#                                                                   zLength + zOrtho_N) + (1 | subjectID) + (1 | item_name)
 # Data: ML.all.correct
 # 
 # AIC      BIC   logLik deviance df.resid 
@@ -321,23 +325,34 @@ summary(full.lmer.3)
 # Number of obs: 10254, groups:  item_name, 320; subjectID, 34
 # 
 # Fixed effects:
-#   Estimate Std. Error t value
-# (Intercept)                      2.8663883  0.0088761   322.9
-# zAge                             0.0134304  0.0089467     1.5
-# zTOWRE_wordacc                   0.0107522  0.0115553     0.9
-# zTOWRE_nonwordacc               -0.0297395  0.0114807    -2.6
-# item_typeword                   -0.0865745  0.0035133   -24.6
-# zLength                          0.0087084  0.0021955     4.0
-# zOrtho_N                         0.0023012  0.0021930     1.0
-# zAge:item_typeword              -0.0003892  0.0019601    -0.2
-# zAge:zLength                     0.0008947  0.0012235     0.7
-# zAge:zOrtho_N                    0.0013009  0.0012230     1.1
-# zTOWRE_wordacc:item_typeword    -0.0208446  0.0025453    -8.2
-# zTOWRE_wordacc:zLength           0.0026710  0.0015899     1.7
-# zTOWRE_wordacc:zOrtho_N         -0.0007182  0.0015960    -0.4
-# zTOWRE_nonwordacc:item_typeword  0.0238505  0.0025324     9.4
-# zTOWRE_nonwordacc:zLength       -0.0053775  0.0015817    -3.4
-# zTOWRE_nonwordacc:zOrtho_N      -0.0019010  0.0015883    -1.2
+#   Estimate Std. Error         df t value Pr(>|t|)    
+# (Intercept)                      2.866e+00  8.876e-03  3.900e+01 322.933  < 2e-16 ***
+#   zAge                             1.343e-02  8.947e-03  3.500e+01   1.501 0.142322    
+# zTOWRE_wordacc                   1.075e-02  1.156e-02  3.500e+01   0.931 0.358510    
+# zTOWRE_nonwordacc               -2.974e-02  1.148e-02  3.500e+01  -2.590 0.013898 *  
+#   item_typeword                   -8.657e-02  3.513e-03  3.040e+02 -24.642  < 2e-16 ***
+#   zLength                          8.708e-03  2.195e-03  3.050e+02   3.967 9.10e-05 ***
+#   zOrtho_N                         2.301e-03  2.193e-03  3.050e+02   1.049 0.294854    
+# zAge:item_typeword              -3.892e-04  1.960e-03  9.903e+03  -0.199 0.842597    
+# zAge:zLength                     8.947e-04  1.223e-03  9.923e+03   0.731 0.464617    
+# zAge:zOrtho_N                    1.301e-03  1.223e-03  9.911e+03   1.064 0.287500    
+# zTOWRE_wordacc:item_typeword    -2.084e-02  2.545e-03  9.899e+03  -8.189 4.44e-16 ***
+#   zTOWRE_wordacc:zLength           2.671e-03  1.590e-03  9.897e+03   1.680 0.092997 .  
+# zTOWRE_wordacc:zOrtho_N         -7.182e-04  1.596e-03  9.900e+03  -0.450 0.652720    
+# zTOWRE_nonwordacc:item_typeword  2.385e-02  2.532e-03  9.900e+03   9.418  < 2e-16 ***
+#   zTOWRE_nonwordacc:zLength       -5.378e-03  1.582e-03  9.904e+03  -3.400 0.000677 ***
+#   zTOWRE_nonwordacc:zOrtho_N      -1.901e-03  1.588e-03  9.905e+03  -1.197 0.231376    
+# ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+# 
+# Correlation matrix not shown by default, as p = 16 > 12.
+# Use print(x, correlation=TRUE)  or
+# vcov(x)	 if you need it
+
+
+
+# we then move to linear mixed-effects modelling ###############################################################
+
 
 # we can compare model fits using information theoretic measures like AIC and BIC
 # -- we would usually select the model with a BIC or AIC that is lower
