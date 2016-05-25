@@ -240,40 +240,40 @@ anova(full.lmer0, full.lmer1)
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Running the \emph{anova$(,)$} comparison will deliver AIC, BIC, and likelihood comparisons for varying models}
+\begin{frame}{Running the \emph{anova$(,)$} comparison will deliver AIC, BIC, and likelihood comparisons for varying models}{Comparison of models: 0, no fixed effects, just random intercepts; 1, with subject attribute predictors; 2, plus item effects; 3, plus interactions between subject effects and item effects}
     \begin{figure}     
-     \includegraphics[scale=0.5]{RStudio-lme-anova-ML-data-subject-item-effects}
-     \caption{Comparison of model with subject attribute predictors and model also with item effects}
+     \includegraphics[scale=0.5]{ML-all-correct-lmer-anova-summary}
+%      \caption{Comparison of models: 0, no fixed effects, just random intercepts; 1, with subject attribute predictors; 2, plus item effects; 3, plus interactions between subject effects and item effects}
     \end{figure}     
 \end{frame}
 
 \begin{frame}{Model comparison}
 \begin{itemize}
 \item<1->
-AIC, BIC and LRT comparisons should be consistent in their indications -- which model to prefer
+AIC, BIC and LRT comparisons should be consistent in their indications -- which model appears preferable
 \item<2->
-Can be tricky where dealing with complex sets of predictors -- indicators may diverge
+Things get tricky where dealing with complex sets of predictors -- indicators may diverge
 \item<3->
 Remember that BIC may penalise complexity more heavily -- especially if conducting exploratory research
 \item<4->
-Remember that may be obliged to include all effects built-in by design -- if conducting confirmatory study
+Remember that you may be obliged to include all effects built-in by design -- if conducting a confirmatory study
 \end{itemize} 
-    \begin{figure}     
-     \includegraphics[scale=0.35]{RStudio-lmer-anova-ML-data}
-     \caption{Comparison of empty model with model with subject attribute predictors}
-    \end{figure}    
+%     \begin{figure}     
+%      \includegraphics[scale=0.175]{ML-all-correct-lmer-anova-summary}
+%      \caption{Comparison of empty model with model with subject attribute predictors}
+%     \end{figure}    
 \end{frame}
 
 
 
-\section{Models specifying random effects}
+\section{More complex random effects structures}
 
 
 
-\begin{frame}[fragile]{A more realistic repeated measures model of word frequency and reading ability effects}{Taking into account random effect of subjects and items}
+\begin{frame}[fragile]{A more realistic model of effects of item type (words vs. nonwords) and subject reading ability}{Taking into account random effect of subjects and items}
 \footnotesize{\begin{equation}
-	RT = \beta_0 +  \beta_{ability} + \beta_{frequency} + \beta_{ability*frequency} +  
-	\alert{\beta_{subject}} + \beta_{item} + \alert{\beta_{subject*frequency}} + \beta_{item*ability} + \epsilon
+	RT = \beta_0 +  \beta_{ability} + \beta_{itemtype} + \beta_{ability*itemtype} +  
+	\alert{\beta_{subject}} + \beta_{item} + \alert{\beta_{subject*itemtype}} + \beta_{item*ability} + \epsilon
 \end{equation}}
 {}
 \begin{itemize}
@@ -281,29 +281,37 @@ Remember that may be obliged to include all effects built-in by design -- if con
 	What about effect of random variation between participants?
 		\begin{itemize}
 		\item<2->
-		Allow \alert{intercept to vary} -- random effect of subject -- some have slower average some have faster average than average overall
+		Allow \alert{intercept to vary} -- random effect of subjects on intercepts -- some have slower average some have faster average than average overall
 		\item<3->
-		Allow \alert{effect of frequency to vary} -- random effect of subject -- subjects can be affected by word frequency in different ways
+		Allow \alert{effect of itemtype to vary} -- random effect of subject on slopes -- subjects can be affected by word frequency in different ways
 		\end{itemize}
 	\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]{A more realistic repeated measures model of the item type and reading ability effects}{Taking into account random effects of subjects and items}
-	\footnotesize{\begin{equation}
-	RT = \beta_0 +  \beta_{ability} + \beta_{frequency} + \beta_{ability*frequency} + 
-	\beta_{subject} + \alert{\beta_{item}} + \beta_{subject*frequency} + \alert{\beta_{item*ability}} + \epsilon
-	\end{equation}}
+\footnotesize{\begin{equation}
+  RT = \beta_0 +  \beta_{ability} + \beta_{itemtype} + \beta_{ability*itemtype} +  
+	\alert{\beta_{subject}} + \beta_{item} + \alert{\beta_{subject*itemtype}} + \beta_{item*ability} + \epsilon
+\end{equation}}
+{}
 \begin{itemize}
 	\item<1->
 	What about effect of random variation between stimuli?
 		\begin{itemize}
 		\item<2->
-		Allow \alert{intercept to vary} -- random effect of items -- some items harder and elicit slower average response than others
+		Allow \alert{intercept to vary} -- random effect of items on intercepts -- some items harder and elicit slower average response than others
 		\item<3->
-		Allow effect of reading ability to vary -- random effect of items?
+		Allow effect of reading ability to vary -- random effect of items on slopes?
 		% -- responses to some items could be more or less susceptible to effect of subject ability
 		\end{itemize}
 	\end{itemize}
+\end{frame}
+
+\begin{frame}{Remember the kind of between-subject differences in intercepts and slopes we need to account for}{Note this plot shows the per-subject linear model coefficients -- in LMEs the estimation (prediction) of random effects (conditional modes) of e.g. subjects on intercepts and slopes adjusts ('shrinks') the estimates towards the average}
+     \begin{figure}     
+      \includegraphics[scale=0.285]{why-how-when-per-subj-estimates}
+            \caption{Per-subject lme coefficients for intercepts and slope of item type effect}
+      \end{figure} 
 \end{frame}
 
 \begin{frame}{Random effect of subjects on \alert{intercepts}}{Differences in individuals' average response speed compared to the group average}
@@ -316,9 +324,6 @@ Remember that may be obliged to include all effects built-in by design -- if con
 	\item<2->
 	\alert{$U_{0,j}$} adjustments to the intercept required to explain differences between common average and average for each $j$ individual
 \end{itemize}
-     \begin{figure}     
-      \includegraphics[scale=0.165]{learners-persubj-oneplot-random-intercepts-freq-RT-010314}
-      \end{figure} 
 \end{frame}
 
 \begin{frame}{Random effect of subjects on \alert{slopes} of fixed effects}{Accounting for variation in \emph{within-subjects} frequency effect on RTs}
@@ -327,14 +332,10 @@ Remember that may be obliged to include all effects built-in by design -- if con
 	\end{equation}
 \begin{itemize}
 	\item<1->
-	$\beta_{1}X_i$ the group average frequency effect
+	$\beta_{1}X_i$ the group average itemtype effect
 	\item<2->
- 	\alert{$U_{1,j}$} adjustments required to model differences between group average frequency effect and frequency effect for each $j$ individual
+ 	\alert{$U_{1,j}$} adjustments required to model differences between group average itemtype effect and itemtype effect for each $j$ individual
 \end{itemize}
-\begin{figure}     
-      \includegraphics[scale=0.165]{learners-persubj-oneplot-random-intercepts-slopes-freq-RT-010314}
-      \caption{Individual differences in effect of word frequency on RTs}
-     \end{figure}
 \end{frame} 
 
 \begin{frame}{Can allow random effects of both subjects and items}{Solving the `language-as-fixed-effect' problem in one model}
@@ -368,13 +369,13 @@ Remember that may be obliged to include all effects built-in by design -- if con
 	\end{equation}
 \begin{itemize}
 	\item<1->
-	$\sigma_{U_{0,j}}^2 + \sigma_{U_{1,j}}^2 + \sigma_{U_{0,j}U_{1,j}}^2$ variances and \alert{covariance} of random effects
+	$\sigma_{U_{0,j}}^2 + \sigma_{U_{1,j}}^2 + \sigma_{U_{0,j}U_{1,j}}^2$ variances and covariance of random effects
 	\item<2->
-  $\sigma_{W_{0,j}}^2 + \sigma_{W_{1,j}}^2 + \sigma_{W_{0,j}W_{1,j}}^2$variances and \alert{covariance} of random effects
+  $\sigma_{W_{0,j}}^2 + \sigma_{W_{1,j}}^2 + \sigma_{W_{0,j}W_{1,j}}^2$variances and covariance of random effects
   \item<3->
   $\sigma_{\epsilon_{ij}}^2$ residuals -- error variance left over
-  \item<4->
-	Covariances are included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions
+%   \item<4->
+% 	Covariances are included because random intercepts and slopes may correlate e.g. if slow subjects are more vulnerable to difference in conditions
 \end{itemize}
 \end{frame}
 
