@@ -245,7 +245,6 @@ ML.all.meanRT.persubjlm.2.int <- filter(ML.all.meanRT.persubjlm.2, term == '(Int
 ML.all.intercepts <- ggplot(ML.all.meanRT.persubjlm.2.int, aes(x = subjectID, y = estimate, ymin = estimate - std.error, ymax = estimate + std.error))
 ML.all.intercepts <- ML.all.intercepts + geom_linerange(colour = "grey", size = 1.5) + geom_point(colour = "black", size = 4) + theme_bw() + ylab("Intercept (+/- SE) of decision RTs") + xlab("subject ID")
 ML.all.intercepts <- ML.all.intercepts + theme(axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text.y = element_text(size = 20), axis.text.x = element_text(size = 20), panel.grid = element_blank())
-# ML.all.intercepts
 
 # -- then filter the dataframe to just the item type effect estimates
 ML.all.meanRT.persubjlm.2.type <- filter(ML.all.meanRT.persubjlm.2, term == 'item_typeword')
@@ -271,6 +270,36 @@ vplayout <- function(x,y)
 
 print(ML.all.intercepts, vp = vplayout(1,1))
 print(ML.all.type, vp = vplayout(1,2))
+
+dev.off()
+
+
+# can combine the per-subject intercepts and itemtype effects dataframes so that can plot per-subject intercepts
+# against itemtype effects -- ie to indicate (not show -- given shrinkage) covariance of random effects
+
+
+# -- rename columns for convenience
+
+summary(ML.all.meanRT.persubjlm.2.int)
+summary(ML.all.meanRT.persubjlm.2.type)
+
+ML.all.meanRT.persubjlm.2.int <- rename(ML.all.meanRT.persubjlm.2.int, estimate.intercept = estimate)
+ML.all.meanRT.persubjlm.2.type <- rename(ML.all.meanRT.persubjlm.2.type, estimate.slope = estimate)
+
+ML.all.meanRT.persubjlm.2.int.type <- merge (ML.all.meanRT.persubjlm.2.int, ML.all.meanRT.persubjlm.2.type, by = "subjectID")
+
+# then plot the by-subjects intercepts and slopes of the item type effect against each other
+
+summary(ML.all.meanRT.persubjlm.2.int.type)
+
+pdf("ML-all-correct-covariance-intercept-itemtype-slope.pdf", w = 12, h = 12)
+
+pML.all.meanRT.persubjlm.2.int.type <- ggplot(ML.all.meanRT.persubjlm.2.int.type, aes(x = estimate.intercept, y = estimate.slope))
+pML.all.meanRT.persubjlm.2.int.type <- pML.all.meanRT.persubjlm.2.int.type + geom_point(size = 2) + geom_smooth(method = 'lm', size = 1.5, colour = "blue")
+pML.all.meanRT.persubjlm.2.int.type <- pML.all.meanRT.persubjlm.2.int.type + theme_bw() 
+pML.all.meanRT.persubjlm.2.int.type <- pML.all.meanRT.persubjlm.2.int.type + ylab("Estimated slope of item type effect") + xlab("Estimated intercept")
+pML.all.meanRT.persubjlm.2.int.type <- pML.all.meanRT.persubjlm.2.int.type + theme(axis.title.x = element_text(size = 25), axis.title.y = element_text(size = 25), axis.text.y = element_text(size = 20), axis.text.x = element_text(size = 20))
+pML.all.meanRT.persubjlm.2.int.type
 
 dev.off()
 
