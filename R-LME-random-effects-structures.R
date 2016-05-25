@@ -23,7 +23,6 @@ library(lme4)
 # set the working directory
 
 setwd("/Users/robdavies/Dropbox/teaching_PG-statistics/demo data")
-
 # work out where your files are and substitute for the path for my files location, above
 
 
@@ -52,20 +51,16 @@ summary(ML.all)
 
 # examine the data  ######################################################################################
 
-# week six workbook reference [1] #######################################################################
 
 
-# -- items -- words and non-words data
+# -- items -- data on responses to words and non-words
+
 
 # the first concern is the presence of error RTs ie negative RTs
-
-
-# start with the items data
-
+# -- look at the minimum value in the summary for RTs
 summary(ML.all)
 
 
-# here we focus on the RT distributions, we start with the items data:
 # clearly there can be no -ve RTs -- we can remove them through at least two ways 
 # -- one way is through conditional subsetting
 # -- set the threshold at 200ms: any shorter must be error or incorrect button press registration
@@ -86,113 +81,15 @@ length(ML.all.correct$RT)
 
 length(ML.all$RT) - length(ML.all.correct$RT)
 
-# what is the percentage of original observations that has been excluded?
-
 
 # inspect the nomissing database
 
 summary(ML.all.correct)
 
+
 # the RT distribution is skewed -- we can deal with the skew using a widely adopted method: log10 transformation of RTs
 
 ML.all.correct$logrt <- log10(ML.all.correct$RT)
-
-
-
-# examine the potential multicollinearity of predictor variables  ############################################
-
-
-# define functions for later use:
-
-
-# pairs plot function
-# -- creates a scatterplot matrix
-
-#code taken from  part of a short guide to R
-#Version of November 26, 2004
-#William Revelle
-
-panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
-{
-  usr <- par("usr"); on.exit(par(usr))
-  par(usr = c(0, 1, 0, 1))
-  r = (cor(x, y))
-  txt <- format(c(r, 0.123456789), digits=digits)[1]
-  txt <- paste(prefix, txt, sep="")
-  if(missing(cex.cor)) cex <- 0.8/strwidth(txt)
-  text(0.5, 0.5, txt, cex = cex * abs(r))
-}
-
-
-# pretty correlation table:
-# -- with stars to show significance
-# just a correlation table, taken from here:
-#   http://myowelt.blogspot.com/2008/04/beautiful-correlation-tables-in-r.html
-# actually adapted from prvious nabble thread:
-
-corstarsl <- function(x){ 
-  require(Hmisc) 
-  x <- as.matrix(x) 
-  R <- rcorr(x)$r 
-  p <- rcorr(x)$P 
-  
-  ## define notions for significance levels; spacing is important.
-  mystars <- ifelse(p < .001, "***", ifelse(p < .01, "** ", ifelse(p < .05, "* ", " ")))
-  
-  ## trunctuate the matrix that holds the correlations to two decimal
-  R <- format(round(cbind(rep(-1.11, ncol(x)), R), 2))[,-1] 
-  
-  ## build a new matrix that includes the correlations with their apropriate stars 
-  Rnew <- matrix(paste(R, mystars, sep=""), ncol=ncol(x)) 
-  diag(Rnew) <- paste(diag(R), " ", sep="") 
-  rownames(Rnew) <- colnames(x) 
-  colnames(Rnew) <- paste(colnames(x), "", sep="") 
-  
-  ## remove upper triangle
-  Rnew <- as.matrix(Rnew)
-  Rnew[upper.tri(Rnew, diag = TRUE)] <- ""
-  Rnew <- as.data.frame(Rnew) 
-  
-  ## remove last column and return the matrix (which is now a data frame)
-  Rnew <- cbind(Rnew[1:length(Rnew)-1])
-  return(Rnew) 
-}
-
-
-# create pairs dbase and check inter-relation of predictor variables
-# -- check out the items variables
-
-summary(ML.all.correct)
-
-ML.all.correct.pairs <- ML.all.correct[, c(
-  
-  "Age", "TOWRE_wordacc", "TOWRE_nonwordacc", "Length",
-  "Ortho_N", "BG_Mean"
-  
-)]
-
-
-# start by examining the correlations between pairs of variables
-
-corstarsl(ML.all.correct.pairs)
-
-
-# draw subject scores scatterplot matrix
-# -- not very helpful -- too many points
-# -- would be better to draw sploms of subject or item level data
-
-pdf("ML.all.correct.pairs-splom.pdf", width = 8, height = 8)
-
-pairs(ML.all.correct.pairs, lower.panel=panel.smooth, upper.panel=panel.cor)
-
-dev.off()
-
-
-# calculate the collinearity diagnostic, condition number, using the collin.fnc() function provided by Baayen's LanguageR library
-
-collin.fnc(na.omit(ML.all.correct.pairs))$cnumber
-
-# -- is it greater than 12 -- that might be considered to be a problematic level of multicollinearity, requiring some remedy, like centering predictor variables on their means
 
 
 
