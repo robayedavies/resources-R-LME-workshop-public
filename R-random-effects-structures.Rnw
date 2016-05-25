@@ -82,26 +82,28 @@
 	\item<3->
 	Will our our capacity to predict responses be improved by adding other terms?
 	\item<4->
-	We expect that factors we manipulate or carry information about response generators should predict variance in observed responses	
+	What about the experimental factors we manipulate? Or variables carrying information about test conditions, particants or stimuli?	
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Evaluating models}{Trade-off between too much and too little simplicity in model selection -- variable selection}
-\begin{itemize}
-	\item<1->
-	Models with too few parameters -- included variables, effects -- have bias 
-	\item<2->
-	\alert{Bias} -- the estimate of the effect coefficient will not on average equal the true value of the coefficient in the population
-\end{itemize}
-\end{frame}
+% \begin{frame}{Evaluating models}{Trade-off between too much and too little simplicity in model selection -- variable selection}
+% \begin{itemize}
+% 	\item<1->
+% 	Models with too few parameters -- included variables, effects -- have bias 
+% 	\item<2->
+% 	\alert{Bias} -- the estimate of the effect coefficient will not on average equal the true value of the coefficient in the population
+% \end{itemize}
+% \end{frame}
 
-\begin{frame}{Simplicity and parsimony}{Trade-off between too much and too little simplicity in model selection -- variable selection}
+\begin{frame}{Simplicity and parsimony}{We can expect to deal with a trade-off between too much and too little simplicity in model specification}
 \begin{itemize}
 	\item<1->
 	Models with too many parameters may tend to identify effects that are spurious
 	\item<2->
 	Effects may be \alert{unintuitive} and hard to explain \emph{and} not reproduced in future samples
 	% burnham & anderson 2001/p112 -- simplicity and parsimony, multiple working hypotheses, strength of evidence	
+  \item<3->
+  Contrastingly, if we omit key variables we will likely mis-estimate the `true' population value of the effects we seek to identify
 \end{itemize}
 \end{frame}
 
@@ -113,12 +115,10 @@
 % burnham & anderson 2001/p.3
 \begin{itemize}
 	\item<1->
-	\alert{Information-theoretic methods} are grounded in the insight that researchers have reality and have approximating models
+	\alert{Information-theoretic methods} are grounded in the insight that the distance between a model and observed outcomes corresponds to the `information lost' when you use a model to approximate reality
 	\item<2->
-	The distance between a model and reality corresponds to the `information lost' when you use a model to approximate reality
-	\item<3->
 	Information criteria -- AIC or BIC -- estimates of \alert{information loss}
-	\item<4->
+	\item<3->
 	The process of model selection aims to minimise information loss
 \end{itemize}
 \end{frame}
@@ -153,7 +153,7 @@ AIC = -2ln(l) + 2k
 	\item<2->
 	You can link models that are more likely -- closer to reality -- with models with smaller residuals
   \item<3->
-  Linear models with smaller residuals would have larger $R^2$
+  Linear models with smaller residuals would have larger $R^2$ -- more of observed outcome (response) variance is explained by better models
 	\end{itemize}
 \end{frame}
 
@@ -175,7 +175,8 @@ BIC = -2ln(l) + kln(N)
 	\end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Model evaluation: \emph{Information-theoretic methods} are grounded in the insight that you have reality and you have approximating models}
+\begin{frame}[fragile]{Model evaluation: using AIC and BIC}
+% \emph{Information-theoretic methods} are grounded in the insight that you have reality and you have approximating models}
 %{Using AIC and BIC}
 % burnham & anderson 2001/p.3
 \begin{itemize}
@@ -194,7 +195,7 @@ BIC = -2ln(l) + kln(N)
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Reporting standards}{Using AIC and BIC -- though, so far, I tend to see such analyses reported more in ecology, little in psychology}
+\begin{frame}[fragile]{Reporting standards; Using AIC and BIC}{So far, I tend to see such analyses reported more in ecology, little in psychology}
 % burnham & anderson 2001/p.3
 \begin{itemize}
 	\item<1->
@@ -203,7 +204,7 @@ BIC = -2ln(l) + kln(N)
 	Report the AIC or BIC for the different models
 	\begin{itemize}
 	\item<3->
-	Report and explain the model selection choice, based on aims of study and information criteria comparisons 
+	Report and explain the model selection \emph{which model is more useful?}, based on aims and information criteria 
 	\end{itemize}
 \end{itemize}
 \end{frame}
@@ -219,7 +220,9 @@ The likelihood ratio is compared to the $\chi^2$ distribution for a significance
 \item<4->
 Assuming the null hypothesis that the simpler model is adequate
 \item<5->
-With degrees of freedom equal to the difference in the number of parameters of the models being compared  
+With df equal to the difference in the number of parameters of the models being compared
+\item<6->
+Alternatively, we can say: $deviance = deviance_{simple} - deviance_{complex}$ where $deviance = -2log(likelihood_{model})$
 \end{itemize}  
 \end{frame}
 
@@ -229,11 +232,11 @@ anova(full.lmer0, full.lmer1)
 \end{verbatim}
 \begin{itemize}
   \item<1->
-  \verb:anova(...,....): -- compare pairs of models
+  \verb:anova(...,....): compare pairs of models named in brackets
 	\item<2->
-	\verb:full.lmer0: -- a simpler model -- more limited assumptions about sources of variance
+	\verb:full.lmer0: including a simpler model -- fewer parameters (predictors)
 	\item<3->
-	\verb:full.lmer1: -- a more complex model -- more predictors -- includes simpler model as a special case
+	\verb:full.lmer1: compared to a more complex model -- more predictors -- includes simpler model as a special case
 \end{itemize}
 \end{frame}
 
