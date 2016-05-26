@@ -28,7 +28,8 @@ library(effects)
 
 getwd()
 
-setwd("[insert working directory address information here]")
+setwd("/Users/robdavies/Dropbox/resources-R-LME-workshop-public")
+# setwd("[insert working directory address information here]")
 
 
 
@@ -139,6 +140,24 @@ summary(all.merged.glmm3)
 # How do we know if increasing model complexity by adding predictors actually helps us to account for variation in outcome values?
 
 anova(all.merged.glmm0, all.merged.glmm1, all.merged.glmm2, all.merged.glmm3)
+
+# > anova(all.merged.glmm0, all.merged.glmm1, all.merged.glmm2, all.merged.glmm3)
+# Data: all.merged
+# Models:
+#   all.merged.glmm0: accuracy ~ (1 | Subjecta) + (1 | targetobject) + (1 | targetaction)
+# all.merged.glmm1: accuracy ~ Experiment + (1 | Subjecta) + (1 | targetobject) + 
+#   all.merged.glmm1:     (1 | targetaction)
+# all.merged.glmm2: accuracy ~ Experiment + block + (1 | Subjecta) + (1 | targetobject) + 
+#   all.merged.glmm2:     (1 | targetaction)
+# all.merged.glmm3: accuracy ~ Experiment * block + (1 | Subjecta) + (1 | targetobject) + 
+#   all.merged.glmm3:     (1 | targetaction)
+# Df   AIC   BIC  logLik deviance    Chisq Chi Df Pr(>Chisq)    
+# all.merged.glmm0  4 17259 17289 -8625.5    17251                               
+# all.merged.glmm1  6 17260 17306 -8624.2    17248   2.5788      2     0.2754    
+# all.merged.glmm2  7 16928 16981 -8457.2    16914 333.9987      1  < 2.2e-16 ***
+#   all.merged.glmm3  9 16888 16956 -8434.9    16870  44.6814      2  1.984e-10 ***
+#   ---
+#   Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 
 # -- now compare models varying in random effects but having the same fixed effects --
