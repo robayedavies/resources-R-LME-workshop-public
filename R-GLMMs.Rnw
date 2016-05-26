@@ -209,10 +209,10 @@ ln\frac{p}{1-p} = logitp = \beta_0 + \beta_1X_1 \dots
 
 \begin{frame}{To illustrate GLMMs we use the word learning data set}{Padraic Monaghan, our colleagues, and I examined the accuracy of responses in a word learning study: noun-verb-learning-study.csv}
 % In our study, we directly compared learning of noun-object pairings, verb- motion pairings, and learning of both noun and verb pairings simultaneously, using an identical cross-situational learning task and environment in each case. We predicted that, consistent with previous studies of noun learning, word-object mappings would be learned from cross-situational statistics even when the utterances were complex and the observed dynamic scenes more complex than stationary figures. We also predicted that it would be possible to learn verbs from the same cross-situational statistics even though the names for the objects remained unknown, and that when nouns and verbs could be learned from the same utterance then cross-situational statistics would be sufficiently powerful to demonstrate learning for both these grammatical categories.
-     \begin{figure}     
-      \includegraphics[scale=0.35]{gavagai-accuracy-histogram}
-      \caption{Histogram showing frequency of correct vs. incorrect responses per subject per learning trials block and experimental learning condition}
-     \end{figure}     
+%      \begin{figure}     
+%       \includegraphics[scale=0.35]{gavagai-accuracy-histogram}
+%       \caption{Histogram showing frequency of correct vs. incorrect responses per subject per learning trials block and experimental learning condition}
+%      \end{figure}     
 \end{frame}
 
 \begin{frame}{The word learning data set}
