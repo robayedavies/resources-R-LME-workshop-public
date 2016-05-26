@@ -147,8 +147,8 @@
 \end{columns}     
 \end{frame}
 
-% jaeger 2008 p3 -- The expected sample proportion p over n trials is given by dividing \mu_X by the number of trials n, and hence is p (as \mu_X is np). Similarly, the variance of the sample proportion is a function of p: \sigma^2_p = \frac{p(1-p)}{n}
-% jaeger 2008 p3 -- In other words, if the probability of a binomially distributed outcome differs between two conditions, the variances will only be identical if p1 and p2 are equally distant from 0.5 (e.g. p1 = .4 and p2 = .6). The bigger the difference in distance from 0.5 between the conditions, the less similar the variances will be. Also, as can be see in Fig. 1, differences close to 0.5 will matter less than differences closer to 0 or 1. Even if p1 and p2 are unequally distant from 0.5, as long as they are close to 0.5, the variances of the sample proportions will be similar. Sample proportions between 0.3 and 0.7 are considered close enough to 0.5 to assume homogeneous variances (Agresti, 2002: 120). Within this interval, p(1􏰆p) ranges from 0.21 for p=.3 or .7 to .25 for p = .5. Unfortunately, we usually cannot determine a priori the range of sample proportions in our experiment (see also Dixon, this issue). Also, in general, variances in two binomially distributed conditions will not be homogeneous—contrary to the assumption of ANOVA.
+% % jaeger 2008 p3 -- The expected sample proportion p over n trials is given by dividing \mu_X by the number of trials n, and hence is p (as \mu_X is np). Similarly, the variance of the sample proportion is a function of p: \sigma^2_p = \frac{p(1-p)}{n}
+% % jaeger 2008 p3 -- In other words, if the probability of a binomially distributed outcome differs between two conditions, the variances will only be identical if p1 and p2 are equally distant from 0.5 (e.g. p1 = .4 and p2 = .6). The bigger the difference in distance from 0.5 between the conditions, the less similar the variances will be. Also, as can be see in Fig. 1, differences close to 0.5 will matter less than differences closer to 0 or 1. Even if p1 and p2 are unequally distant from 0.5, as long as they are close to 0.5, the variances of the sample proportions will be similar. Sample proportions between 0.3 and 0.7 are considered close enough to 0.5 to assume homogeneous variances (Agresti, 2002: 120). Within this interval, p(1􏰆p) ranges from 0.21 for p=.3 or .7 to .25 for p = .5. Unfortunately, we usually cannot determine a priori the range of sample proportions in our experiment (see also Dixon, this issue). Also, in general, variances in two binomially distributed conditions will not be homogeneous—contrary to the assumption of ANOVA.
 
 \begin{frame}{Recognize the limitations of traditional methods for analyzing response accuracy}{The methods are common in the psychological literature but can give the wrong results}
   \begin{itemize}
@@ -190,7 +190,7 @@
   \end{itemize}    
 \end{frame}
 
-\begin{frame}{We can think of logistic models as working like linear models with log-odds outcomes}
+\begin{frame}[fragile]{We can think of logistic models as working like linear models with log-odds outcomes}
 \begin{equation}
 ln\frac{p}{1-p} = logitp = \beta_0 + \beta_1X_1 \dots
 \end{equation}
@@ -207,7 +207,7 @@ ln\frac{p}{1-p} = logitp = \beta_0 + \beta_1X_1 \dots
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{To illustrate GLMMs we use the word learning data set}{Padraic Monaghan, me and colleagues examined the accuracy of responses in a word learning study: noun-verb-learning-study.csv}
+\begin{frame}{To illustrate GLMMs we use the word learning data set}{Padraic Monaghan, our colleagues, and I examined the accuracy of responses in a word learning study: noun-verb-learning-study.csv}
 % In our study, we directly compared learning of noun-object pairings, verb- motion pairings, and learning of both noun and verb pairings simultaneously, using an identical cross-situational learning task and environment in each case. We predicted that, consistent with previous studies of noun learning, word-object mappings would be learned from cross-situational statistics even when the utterances were complex and the observed dynamic scenes more complex than stationary figures. We also predicted that it would be possible to learn verbs from the same cross-situational statistics even though the names for the objects remained unknown, and that when nouns and verbs could be learned from the same utterance then cross-situational statistics would be sufficiently powerful to demonstrate learning for both these grammatical categories.
      \begin{figure}     
       \includegraphics[scale=0.35]{gavagai-accuracy-histogram}
@@ -239,10 +239,10 @@ ln\frac{p}{1-p} = logitp = \beta_0 + \beta_1X_1 \dots
 \end{frame}
 
 \begin{frame}{Phenomena and data sets in the social sciences often have a multilevel structure}{This is true for the word learning data set, which has a repeated measures design, requiring the use of mixed-effects models}
-     \begin{figure}     
-      \includegraphics[scale=0.4]{LME-multistage-sample-snijders-fig2-1}
-      \caption{Snijders \& Bosker (2012) Multistage sample}
-     \end{figure}     
+%      \begin{figure}     
+%       \includegraphics[scale=0.4]{LME-multistage-sample-snijders-fig2-1}
+%       \caption{Snijders \& Bosker (2012) Multistage sample}
+%      \end{figure}     
 \end{frame}
 
 \begin{frame}{Variation in learning between participants}{We can reasonably attempt to model random effects of subjects on intercepts and the slope of the learning block and experimental condition effects}
@@ -274,7 +274,7 @@ summary(all.merged.glmm0)
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Add effect of experimental condition}
+\begin{frame}[fragile]{Add a predictor variable coding for the effect of experimental condition}
 \footnotesize{\begin{verbatim}
 all.merged.glmm1 <- glmer(accuracy ~ 
                             
@@ -294,7 +294,8 @@ summary(all.merged.glmm1)
 \end{itemize}
 \end{frame}
 
-\begin{frame}[fragile]{Add effect of experimental condition and block}{It might be sensible to add both main effects in one step}
+\begin{frame}[fragile]{Add a predictor variable coding for learning trial block}
+% {I think it is sensible to add both main effects in one step}
 \footnotesize{\begin{verbatim}
 all.merged.glmm2 <- glmer(accuracy ~ 
                             
@@ -383,8 +384,7 @@ summary(all.merged.glmm4)
      \end{figure} 
 \end{frame}
 
-\begin{frame}[fragile]{Extreme correlations (near 0 or 1) between random effects on intercepts and on slopes of fixed effects suggest the level
-of complexity in the model cannot really be justified}{Note also that the variances for the random effects of items on the slopes of the block effect are very small}
+\begin{frame}[fragile]{Extreme correlations (near 0 or 1) between random effects on intercepts and on slopes of fixed effects suggest the level of complexity in the model cannot really be justified}{Note also that the variances for the random effects of items on the slopes of the block effect are very small}
 \begin{itemize}
   \item<1->
 % 	Correlations between the random effects of items on intercepts and the slopes of the block effect suggest that the level
@@ -413,7 +413,7 @@ all.merged.glmm5 <- glmer(accuracy ~
 summary(all.merged.glmm5)
 \end{verbatim}}
 \begin{itemize}
-  \item<1->
+  \item
 	\verb:(1|targetobject) + (1|targetaction) + (block + 0|targetobject) + (block + 0|targetaction): the terms like \verb:(1|targetobject): specify a random effect (of items) on intercepts, while the terms \verb:(block + 0|targetobject): specify a random effect of items on the slope of the fixed effect (here, of block)
 \end{itemize}
 \end{frame}
@@ -433,8 +433,7 @@ If no difference between these models in relative fit then the item random effec
      \end{figure} 
 \end{frame}
 
-\begin{frame}[fragile]{Reporting standards}{Model comparisons}
-%{Using AIC and BIC}
+\begin{frame}[fragile]{Reporting standards}{Model comparisons -- Using AIC, BIC and LRT}
 % burnham & anderson 2001/p.3
 \begin{itemize}
   \item<1->
@@ -462,6 +461,8 @@ Report random effects variance and covariance (if applicable)
      \caption{Model summary table -- word learning study -- GLMM}
     \end{figure}    
 \end{frame}
+
+
 
 
 \end{document}
